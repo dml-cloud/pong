@@ -1,0 +1,14 @@
+Initial commit - Pong Classic webapp
+
+Classic Pong game for smartphone with touch controls.
+Features:
+- 1 or 2 player modes
+- Touch/drag paddle controls with multi-touch support
+- AI opponent for single player mode
+- Retro arcade visual style with CRT effects
+- Sound effects
+- Responsive design for mobile
+
+First to 11 points wins.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>

@@ -3,349 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='25' width='12' height='50' rx='3' fill='%2300ff88'/><rect x='78' y='25' width='12' height='50' rx='3' fill='%23ff6b6b'/><circle cx='50' cy='50' r='10' fill='white'/></svg>">
+    <title>Pong Classic</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='5' y='20' width='15' height='60' rx='4' fill='%2300ff88'/%3E%3Crect x='80' y='20' width='15' height='60' rx='4' fill='%23ff6b6b'/%3E%3Ccircle cx='50' cy='50' r='12' fill='white'/%3E%3C/svg%3E">
     <meta name="theme-color" content="#1a1a2e">
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiUG9uZyBDbGFzc2ljIiwic2hvcnRfbmFtZSI6IlBvbmciLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzFhMWEyZSIsInRoZW1lX2NvbG9yIjoiIzFhMWEyZSIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWwsPHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48cmVjdCB4PScxMCcgeT0nMjUnIHdpZHRoPScxMicgaGVpZ2h0PSc1MCcgcng9JzMnIGZpbGw9JyMwMGZmODgnLz48cmVjdCB4PSc3OCcgeT0nMjUnIHdpZHRoPScxMicgaGVpZ2h0PSc1MCcgcng9JzMnIGZpbGw9JyNmZjZiNmInLz48Y2lyY2xlIGN4PSc1MCcgY3k9JzUwJyByPScxMCcgZmlsbD0nd2hpdGUnLz48L3N2Zz4iLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='5' y='20' width='15' height='60' rx='4' fill='%2300ff88'/%3E%3Crect x='80' y='20' width='15' height='60' rx='4' fill='%23ff6b6b'/%3E%3Ccircle cx='50' cy='50' r='12' fill='white'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peer.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #0d0d1a;
-            font-family: 'Press Start 2P', monospace;
-        }
-
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .game-container {
-            position: relative;
-            width: 100%;
-            max-width: 480px;
-            height: 100vh;
-            height: 100dvh;
-            background: #1a1a2e;
-            overflow: hidden;
-        }
-
-        .game-container::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                repeating-linear-gradient(
-                    0deg,
-                    rgba(0, 0, 0, 0.15) 0px,
-                    rgba(0, 0, 0, 0.15) 1px,
-                    transparent 1px,
-                    transparent 2px
-                );
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        .game-container::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 100%);
-            pointer-events: none;
-            z-index: 11;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        .overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: rgba(26, 26, 46, 0.95);
-            z-index: 20;
-            gap: 25px;
-            padding: 20px;
-        }
-
-        .overlay.hidden {
-            display: none;
-        }
-
-        .title {
-            font-size: clamp(18px, 6vw, 28px);
-            color: #fff;
-            text-shadow: 0 0 20px rgba(255,255,255,0.5);
-            text-align: center;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { text-shadow: 0 0 10px rgba(255,255,255,0.3); }
-            to { text-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 40px rgba(0,255,136,0.4); }
-        }
-
-        .subtitle {
-            font-size: clamp(8px, 2.5vw, 12px);
-            color: #888;
-            text-align: center;
-        }
-
-        .menu-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-            max-width: 280px;
-        }
-
-        .btn {
-            padding: 15px 25px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: clamp(9px, 2.5vw, 12px);
-            border: none;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .btn:active {
-            transform: scale(0.96);
-        }
-
-        .btn-com {
-            background: #00ff88;
-            color: #1a1a2e;
-        }
-
-        .btn-com:active {
-            background: #00cc6a;
-        }
-
-        .btn-online {
-            background: #ff6b6b;
-            color: #1a1a2e;
-        }
-
-        .btn-online:active {
-            background: #cc5555;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: #0d0d1a; font-family: 'Press Start 2P', monospace; }
+        body { display: flex; justify-content: center; align-items: center; }
+        .game-container { position: relative; width: 100%; max-width: 480px; height: 100vh; height: 100dvh; background: #1a1a2e; overflow: hidden; }
+        .game-container::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px); pointer-events: none; z-index: 10; }
+        .game-container::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 100%); pointer-events: none; z-index: 11; }
+        canvas { display: block; width: 100%; height: 100%; }
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(26, 26, 46, 0.97); z-index: 20; gap: 20px; padding: 20px; }
+        .overlay.hidden { display: none; }
+        .title { font-size: clamp(20px, 7vw, 32px); color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.5); text-align: center; animation: glow 2s ease-in-out infinite alternate; }
+        @keyframes glow { from { text-shadow: 0 0 10px rgba(255,255,255,0.3); } to { text-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 40px rgba(0,255,136,0.4); } }
+        .subtitle { font-size: clamp(8px, 2.5vw, 12px); color: #888; text-align: center; }
+        .menu-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; }
+        .btn { padding: 14px 20px; font-family: 'Press Start 2P', monospace; font-size: clamp(8px, 2.5vw, 11px); border: none; cursor: pointer; transition: all 0.15s ease; }
+        .btn:active { transform: scale(0.96); }
+        .btn-com { background: #00ff88; color: #1a1a2e; }
+        .btn-online { background: #ff6b6b; color: #1a1a2e; }
         .btn-easy { background: #4ade80; color: #1a1a2e; }
         .btn-normal { background: #fbbf24; color: #1a1a2e; }
         .btn-hard { background: #f87171; color: #1a1a2e; }
-
-        .btn-play {
-            background: #fff;
-            color: #1a1a2e;
-        }
-
-        .btn-back {
-            background: transparent;
-            border: 2px solid #666;
-            color: #888;
-        }
-
-        .btn-copy {
-            background: #6366f1;
-            color: #fff;
-        }
-
-        .difficulty-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .score-display {
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 35px;
-            z-index: 5;
-            font-size: clamp(14px, 4vw, 22px);
-        }
-
-        .score-p1 {
-            color: #00ff88;
-            text-shadow: 0 0 10px rgba(0,255,136,0.5);
-        }
-
-        .score-p2 {
-            color: #ff6b6b;
-            text-shadow: 0 0 10px rgba(255,107,107,0.5);
-        }
-
-        .mode-indicator {
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 7px;
-            color: #666;
-            z-index: 5;
-        }
-
-        .menu-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
-            background: rgba(255,255,255,0.1);
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 15;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .menu-btn:active {
-            background: rgba(255,255,255,0.2);
-        }
-
-        .winner-text {
-            font-size: clamp(10px, 3vw, 14px);
-            text-align: center;
-            line-height: 2;
-        }
-
+        .btn-play { background: #fff; color: #1a1a2e; }
+        .btn-back { background: transparent; border: 2px solid #555; color: #888; }
+        .btn-copy { background: #6366f1; color: #fff; }
+        .btn-small { padding: 10px 15px; font-size: 8px; }
+        .difficulty-buttons { display: flex; flex-direction: column; gap: 10px; }
+        .score-display { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 35px; z-index: 5; font-size: clamp(14px, 4vw, 22px); }
+        .score-p1 { color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.5); }
+        .score-p2 { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,0.5); }
+        .mode-indicator { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); font-size: 7px; color: #666; z-index: 5; }
+        .menu-btn { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; cursor: pointer; z-index: 15; display: none; justify-content: center; align-items: center; font-size: 16px; color: #888; }
+        .menu-btn:active { background: rgba(255,255,255,0.2); }
+        .footer { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 7px; color: #555; z-index: 5; white-space: nowrap; opacity: 0.7; }
+        .winner-text { font-size: clamp(10px, 3vw, 14px); text-align: center; line-height: 2; }
         .winner-p1 { color: #00ff88; }
         .winner-p2 { color: #ff6b6b; }
-
-        .instruction {
-            font-size: 7px;
-            color: #555;
-            text-align: center;
-            line-height: 2;
-        }
-
-        .footer {
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 6px;
-            color: #333;
-            z-index: 5;
-            white-space: nowrap;
-        }
-
-        .online-code-box {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid #444;
-            padding: 15px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 300px;
-        }
-
-        .code-display {
-            background: #111;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 8px;
-            word-break: break-all;
-            color: #0f0;
-            margin: 10px 0;
-            max-height: 80px;
-            overflow-y: auto;
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-row .btn {
-            flex: 1;
-            padding: 12px 15px;
-        }
-
-        .status-text {
-            font-size: 8px;
-            color: #888;
-            text-align: center;
-            min-height: 20px;
-        }
-
-        .waiting-text {
-            color: #fbbf24;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        @media (orientation: landscape) {
-            .landscape-warning {
-                display: flex !important;
-            }
-            canvas, .overlay, .footer {
-                display: none;
-            }
-        }
-
-        .landscape-warning {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: #1a1a2e;
-            color: #fff;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 12px;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            z-index: 100;
-        }
+        .instruction { font-size: 7px; color: #555; text-align: center; line-height: 2; }
+        .menu-brand { font-size: 7px; color: #444; text-align: center; margin-top: 10px; }
+        .online-code-box { background: rgba(0,0,0,0.3); border: 1px solid #444; padding: 15px; border-radius: 8px; width: 100%; max-width: 300px; }
+        .code-display { background: #111; padding: 12px; border-radius: 4px; font-size: 10px; word-break: break-all; color: #0f0; margin: 10px 0; max-height: 60px; overflow-y: auto; font-family: monospace; text-align: center; }
+        .btn-row { display: flex; gap: 10px; width: 100%; max-width: 300px; }
+        .btn-row .btn { flex: 1; padding: 12px 10px; }
+        .status-text { font-size: 8px; color: #888; text-align: center; min-height: 20px; }
+        .waiting-text { color: #fbbf24; animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        @media (orientation: landscape) { .landscape-warning { display: flex !important; } canvas, .overlay { display: none; } }
+        .landscape-warning { display: none; position: fixed; inset: 0; background: #1a1a2e; color: #fff; font-family: 'Press Start 2P', monospace; font-size: 12px; justify-content: center; align-items: center; text-align: center; padding: 20px; z-index: 100; }
     </style>
 </head>
 <body>
-    <div class="landscape-warning">
-        GIRA TU DISPOSITIVO<br><br>PORTRAIT MODE
-    </div>
-
+    <div class="landscape-warning">GIRA TU DISPOSITIVO<br><br>PORTRAIT MODE</div>
     <div class="game-container">
         <canvas id="gameCanvas"></canvas>
-
         <div class="score-display" id="scoreDisplay" style="display: none;">
             <span class="score-p1" id="scoreP1">0</span>
             <span class="score-p2" id="scoreP2">0</span>
         </div>
         <div class="mode-indicator" id="modeIndicator" style="display: none;"></div>
-
         <button class="menu-btn" id="menuBtn" title="Menú">☰</button>
+        <div class="footer" id="footer" style="display: none;">DML Studios</div>
 
-        <div class="footer" id="footer" style="display: none;"></div>
-
-        <!-- Main Menu -->
         <div class="overlay" id="mainMenu">
             <div class="title">PONG</div>
             <div class="subtitle">CLASSIC</div>
@@ -353,12 +79,10 @@
                 <button class="btn btn-com" id="btnCOM">1 JUGADOR vs COM</button>
                 <button class="btn btn-online" id="btnOnline">2 JUGADORES ONLINE</button>
             </div>
-            <div class="instruction">
-                TOCA LA PANTALLA PARA MOVER<br>LA PALETA
-            </div>
+            <div class="instruction">TOCA LA PANTALLA PARA MOVER<br>LA PALETA</div>
+            <div class="menu-brand">DML Studios</div>
         </div>
 
-        <!-- Difficulty Menu -->
         <div class="overlay hidden" id="difficultyMenu">
             <div class="title">DIFICULTAD</div>
             <div class="difficulty-buttons">
@@ -369,7 +93,6 @@
             <button class="btn btn-back" id="btnBackFromDiff">← VOLVER</button>
         </div>
 
-        <!-- Online Menu -->
         <div class="overlay hidden" id="onlineMenu">
             <div class="title">ONLINE</div>
             <div class="menu-buttons">
@@ -379,61 +102,52 @@
             <button class="btn btn-back" id="btnBackFromOnline">← VOLVER</button>
         </div>
 
-        <!-- Create Room -->
         <div class="overlay hidden" id="createRoomMenu">
-            <div class="title">CREANDO...</div>
+            <div class="title">ESPERANDO...</div>
             <div class="online-code-box">
                 <div class="status-text">Comparte este código con tu amigo:</div>
-                <div class="code-display" id="roomCode">Generando...</div>
+                <div class="code-display" id="roomCode">---</div>
             </div>
-            <button class="btn btn-back" id="btnCancelCreate">CANCELAR</button>
+            <button class="btn btn-back btn-small" id="btnCancelCreate">CANCELAR</button>
         </div>
 
-        <!-- Join Room -->
         <div class="overlay hidden" id="joinRoomMenu">
             <div class="title">UNIRSE</div>
             <div class="online-code-box">
                 <div class="status-text">Pega el código de tu amigo:</div>
-                <textarea class="code-display" id="joinCode" placeholder="Pega el código aquí..." style="width: 100%; color: #0f0; resize: none;"></textarea>
+                <input type="text" class="code-display" id="joinCode" placeholder="Pega el código aquí..." style="width: 100%; color: #0f0; border: none; outline: none; resize: none; font-family: monospace;">
             </div>
             <button class="btn btn-copy" id="btnConnectJoin">CONECTAR</button>
-            <button class="btn btn-back" id="btnCancelJoin">← VOLVER</button>
+            <button class="btn btn-back btn-small" id="btnCancelJoin">← VOLVER</button>
         </div>
 
-        <!-- Connecting -->
         <div class="overlay hidden" id="connectingMenu">
             <div class="title">CONECTANDO</div>
-            <div class="status-text waiting-text" id="connectingStatus">Esperando al otro jugador...</div>
+            <div class="status-text waiting-text" id="connectingStatus">Esperando conexión...</div>
         </div>
 
-        <!-- Game Over -->
         <div class="overlay hidden" id="gameOverMenu">
             <div class="title">JUEGO TERMINADO</div>
             <div class="winner-text" id="winnerText"></div>
             <button class="btn btn-play" id="btnPlayAgain">JUGAR OTRA VEZ</button>
-            <button class="btn btn-back" id="btnMenuFinal">MENU</button>
+            <button class="btn btn-back" id="btnMenuFinal">MENÚ</button>
         </div>
     </div>
 
     <script>
         // Audio
         let audioCtx = null;
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         function playSound(freq, duration, type = 'square') {
             if (!audioCtx) return;
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = type;
-                osc.frequency.value = freq;
+                osc.type = type; osc.frequency.value = freq;
                 gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration / 1000);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + duration / 1000);
             } catch(e) {}
         }
         function playPaddleHit() { playSound(440, 50); }
@@ -451,69 +165,44 @@
         const MAX_SPEED_MULTIPLIER = 2;
         const MAX_BOUNCE_ANGLE = Math.PI / 3;
 
-        // Difficulty settings
         const DIFFICULTY = {
             EASY: { errorMargin: 0.30, reactionSpeed: 0.6, name: 'FÁCIL' },
             NORMAL: { errorMargin: 0.12, reactionSpeed: 0.85, name: 'NORMAL' },
             HARD: { errorMargin: 0.03, reactionSpeed: 1.1, name: 'DIFÍCIL' }
         };
 
-        // Game State
-        const GameState = { MENU: 'menu', PLAYING: 'playing', SCORED: 'scored', GAME_OVER: 'game_over', ONLINE_SETUP: 'online_setup' };
+        const GameState = { MENU: 'menu', PLAYING: 'playing', SCORED: 'scored', GAME_OVER: 'game_over' };
 
-        // Game Variables
         let canvas, ctx;
         let gameState = GameState.MENU;
-        let gameMode = 'com'; // 'com' or 'online'
+        let gameMode = 'com';
         let difficulty = DIFFICULTY.NORMAL;
-        let isOnlineHost = false;
         let score = { p1: 0, p2: 0 };
-
-        let paddleWidth, paddleHeight, ballRadius;
-        let initialBallSpeed, ballSpeed;
-
+        let paddleWidth, paddleHeight, ballRadius, initialBallSpeed, ballSpeed;
         let paddle1Y, paddle2Y, paddle1TargetY, paddle2TargetY;
-        let ballX, ballY, ballVX, ballVY;
-        let ballTrail = [];
-
+        let ballX, ballY, ballVX, ballVY, ballTrail = [];
         let lastTime = 0, scoredTimer = 0;
         const SCORED_DELAY = 1000;
-
         let touchLeft = { active: false, y: 0 };
         let touchRight = { active: false, y: 0 };
 
         // Online
-        let peerConnection = null;
-        let dataChannel = null;
+        let peer = null;
+        let conn = null;
+        let isHost = false;
         let isConnected = false;
-        let isMyTurn = false;
-
-        const rtcConfig = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-        };
 
         // DOM Elements
         let mainMenu, difficultyMenu, onlineMenu, createRoomMenu, joinRoomMenu, connectingMenu, gameOverMenu;
         let scoreDisplay, modeIndicator, menuBtn, footer;
-        let scoreP1El, scoreP2El, winnerText;
-        let roomCodeEl, joinCodeEl, connectingStatus;
+        let scoreP1El, scoreP2El, winnerText, roomCodeEl, joinCodeEl, connectingStatus;
 
-        function hideAllOverlays() {
-            [mainMenu, difficultyMenu, onlineMenu, createRoomMenu, joinRoomMenu, connectingMenu, gameOverMenu].forEach(el => el.classList.add('hidden'));
-        }
-
-        function showOverlay(overlay) {
-            hideAllOverlays();
-            overlay.classList.remove('hidden');
-        }
+        function hideAllOverlays() { [mainMenu, difficultyMenu, onlineMenu, createRoomMenu, joinRoomMenu, connectingMenu, gameOverMenu].forEach(el => el.classList.add('hidden')); }
+        function showOverlay(overlay) { hideAllOverlays(); overlay.classList.remove('hidden'); }
 
         function initDOM() {
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
-
             mainMenu = document.getElementById('mainMenu');
             difficultyMenu = document.getElementById('difficultyMenu');
             onlineMenu = document.getElementById('onlineMenu');
@@ -521,12 +210,10 @@
             joinRoomMenu = document.getElementById('joinRoomMenu');
             connectingMenu = document.getElementById('connectingMenu');
             gameOverMenu = document.getElementById('gameOverMenu');
-
             scoreDisplay = document.getElementById('scoreDisplay');
             modeIndicator = document.getElementById('modeIndicator');
             menuBtn = document.getElementById('menuBtn');
             footer = document.getElementById('footer');
-
             scoreP1El = document.getElementById('scoreP1');
             scoreP2El = document.getElementById('scoreP2');
             winnerText = document.getElementById('winnerText');
@@ -534,22 +221,18 @@
             joinCodeEl = document.getElementById('joinCode');
             connectingStatus = document.getElementById('connectingStatus');
 
-            // Menu buttons
             document.getElementById('btnCOM').addEventListener('click', () => showOverlay(difficultyMenu));
             document.getElementById('btnOnline').addEventListener('click', () => showOverlay(onlineMenu));
             document.getElementById('btnBackFromDiff').addEventListener('click', () => showOverlay(mainMenu));
             document.getElementById('btnBackFromOnline').addEventListener('click', () => showOverlay(mainMenu));
-
             document.getElementById('btnEasy').addEventListener('click', () => startCOMGame(DIFFICULTY.EASY));
             document.getElementById('btnNormal').addEventListener('click', () => startCOMGame(DIFFICULTY.NORMAL));
             document.getElementById('btnHard').addEventListener('click', () => startCOMGame(DIFFICULTY.HARD));
-
             document.getElementById('btnCreateRoom').addEventListener('click', createRoom);
             document.getElementById('btnJoinRoom').addEventListener('click', () => showOverlay(joinRoomMenu));
             document.getElementById('btnConnectJoin').addEventListener('click', joinRoom);
             document.getElementById('btnCancelCreate').addEventListener('click', cancelOnline);
             document.getElementById('btnCancelJoin').addEventListener('click', cancelOnline);
-
             document.getElementById('btnPlayAgain').addEventListener('click', playAgain);
             document.getElementById('btnMenuFinal').addEventListener('click', showMainMenu);
             menuBtn.addEventListener('click', showMainMenu);
@@ -566,7 +249,6 @@
             canvas.width = container.clientWidth * dpr;
             canvas.height = container.clientHeight * dpr;
             ctx.scale(dpr, dpr);
-
             const w = container.clientWidth, h = container.clientHeight;
             paddleWidth = w * PADDLE_WIDTH_RATIO;
             paddleHeight = h * PADDLE_HEIGHT_RATIO;
@@ -577,10 +259,7 @@
         function resetBall() {
             const container = canvas.parentElement;
             const w = container.clientWidth, h = container.clientHeight;
-            ballX = w / 2;
-            ballY = h / 2;
-            ballSpeed = initialBallSpeed;
-
+            ballX = w / 2; ballY = h / 2; ballSpeed = initialBallSpeed;
             const angle = (Math.random() * 0.5 - 0.25) * Math.PI;
             const direction = Math.random() < 0.5 ? 1 : -1;
             ballVX = Math.sin(angle) * ballSpeed * direction;
@@ -600,121 +279,109 @@
 
         function startCOMGame(diff) {
             initAudio();
-            difficulty = diff;
-            gameMode = 'com';
-            resize();
-            resetGame();
-
+            difficulty = diff; gameMode = 'com';
+            resize(); resetGame();
             gameState = GameState.PLAYING;
             hideAllOverlays();
             scoreDisplay.style.display = 'flex';
             modeIndicator.style.display = 'block';
             modeIndicator.textContent = `1 JUGADOR vs ${diff.name}`;
             menuBtn.style.display = 'flex';
-            footer.textContent = 'DML Studios';
             footer.style.display = 'block';
-
             lastTime = performance.now();
             requestAnimationFrame(gameLoop);
         }
 
-        async function createRoom() {
+        // Online with PeerJS
+        function generateShortCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+            return code;
+        }
+
+        function createRoom() {
             showOverlay(createRoomMenu);
             initAudio();
 
-            peerConnection = new RTCPeerConnection(rtcConfig);
+            const code = generateShortCode();
+            roomCodeEl.textContent = code;
 
-            dataChannel = peerConnection.createDataChannel('gameData', { ordered: false });
-            setupDataChannel(dataChannel);
+            peer = new Peer('pong-' + code, { debug: 0 });
 
-            peerConnection.onicecandidate = (e) => {
-                if (e.candidate === null) {
-                    const offer = JSON.stringify(peerConnection.localDescription);
-                    roomCodeEl.textContent = btoa(offer);
+            peer.on('open', (id) => {
+                connectingStatus.textContent = 'Esperando a tu amigo...';
+            });
+
+            peer.on('connection', (c) => {
+                conn = c;
+                isHost = true;
+                isConnected = true;
+                setupConnection();
+            });
+
+            peer.on('error', (err) => {
+                if (err.type === 'unavailable-id') {
+                    roomCodeEl.textContent = 'Código en uso, vuelve a intentar';
+                } else {
+                    alert('Error: ' + err.type);
                 }
-            };
-
-            peerConnection.oniceconnectionstatechange = () => {
-                if (peerConnection.iceConnectionState === 'connected') {
-                    isConnected = true;
-                    isOnlineHost = true;
-                    isMyTurn = true;
-                    startOnlineGame(true);
-                }
-            };
-
-            await peerConnection.setLocalDescription();
+            });
         }
 
-        async function joinRoom() {
-            const code = joinCodeEl.value.trim();
+        function joinRoom() {
+            const code = joinCodeEl.value.trim().toUpperCase();
             if (!code) return;
 
-            try {
-                const offer = atob(code);
-                showOverlay(connectingMenu);
-                connectingStatus.textContent = 'Conectando...';
+            showOverlay(connectingMenu);
+            connectingStatus.textContent = 'Conectando...';
+            initAudio();
 
-                peerConnection = new RTCPeerConnection(rtcConfig);
+            peer = new Peer({ debug: 0 });
 
-                peerConnection.ondatachannel = (e) => {
-                    dataChannel = e.channel;
-                    setupDataChannel(dataChannel);
-                };
+            peer.on('open', () => {
+                conn = peer.connect('pong-' + code, { reliable: true });
+                conn.on('open', () => {
+                    isHost = false;
+                    isConnected = true;
+                    setupConnection();
+                });
+                conn.on('error', (err) => {
+                    alert('No se pudo conectar. Vérifica el código.');
+                    showOverlay(joinRoomMenu);
+                });
+            });
 
-                peerConnection.oniceconnectionstatechange = () => {
-                    if (peerConnection.iceConnectionState === 'connected') {
-                        isConnected = true;
-                        isOnlineHost = false;
-                        isMyTurn = false;
-                    }
-                };
-
-                peerConnection.onicecandidate = (e) => {
-                    if (e.candidate === null) {
-                        const answer = JSON.stringify(peerConnection.localDescription);
-                        navigator.clipboard.writeText(btoa(answer)).then(() => {
-                            connectingStatus.textContent = 'Código copiado. Compártelo con el host.';
-                        });
-                    }
-                };
-
-                const parsedOffer = JSON.parse(offer);
-                await peerConnection.setRemoteDescription(parsedOffer);
-                await peerConnection.setLocalDescription();
-            } catch (err) {
-                alert('Código inválido. Inténtalo de nuevo.');
+            peer.on('error', (err) => {
+                alert('Error: ' + err.type);
                 showOverlay(joinRoomMenu);
-            }
+            });
+
+            setTimeout(() => {
+                if (!isConnected) {
+                    peer.destroy();
+                    showOverlay(joinRoomMenu);
+                }
+            }, 10000);
         }
 
-        function setupDataChannel(channel) {
-            channel.onopen = () => {
-                console.log('Data channel open');
-            };
+        function setupConnection() {
+            conn.on('data', (data) => { handleOnlineMessage(data); });
 
-            channel.onmessage = (e) => {
-                const data = JSON.parse(e.data);
-                handleOnlineMessage(data);
-            };
+            if (isHost) {
+                startOnlineGame(true);
+            }
         }
 
         function handleOnlineMessage(data) {
             if (data.type === 'start') {
-                isConnected = true;
-                isOnlineHost = data.isHost;
-                isMyTurn = data.isHost;
-                startOnlineGame(data.isHost);
+                startOnlineGame(false);
             } else if (data.type === 'input') {
-                if (!isMyTurn) {
-                    paddle2TargetY = data.y;
-                }
+                paddle2TargetY = data.y;
             } else if (data.type === 'sync') {
                 score = data.score;
-                ballX = data.ballX;
-                ballY = data.ballY;
-                ballVX = data.ballVX;
-                ballVY = data.ballVY;
+                ballX = data.ballX; ballY = data.ballY;
+                ballVX = data.ballVX; ballVY = data.ballVY;
                 ballSpeed = data.ballSpeed;
                 updateScoreDisplay();
             } else if (data.type === 'scored') {
@@ -726,46 +393,33 @@
             }
         }
 
-        function sendOnlineMessage(data) {
-            if (dataChannel && dataChannel.readyState === 'open') {
-                dataChannel.send(JSON.stringify(data));
-            }
+        function sendOnline(data) {
+            if (conn && conn.open) conn.send(data);
         }
 
-        function startOnlineGame(isHost) {
-            gameMode = 'online';
-            resize();
-            resetGame();
+        function cancelOnline() {
+            if (peer) { peer.destroy(); peer = null; }
+            conn = null; isConnected = false; isHost = false;
+            showOverlay(onlineMenu);
+        }
 
+        function startOnlineGame(isHostPlayer) {
+            gameMode = 'online';
+            resize(); resetGame();
             gameState = GameState.PLAYING;
             hideAllOverlays();
             scoreDisplay.style.display = 'flex';
             modeIndicator.style.display = 'block';
-            modeIndicator.textContent = 'ONLINE';
+            modeIndicator.textContent = isHostPlayer ? 'ONLINE (HOST)' : 'ONLINE (GUEST)';
             menuBtn.style.display = 'flex';
-            footer.textContent = 'DML Studios';
             footer.style.display = 'block';
 
-            sendOnlineMessage({ type: 'start', isHost });
-
+            if (isHost) sendOnline({ type: 'start' });
             lastTime = performance.now();
             requestAnimationFrame(gameLoop);
         }
 
-        function cancelOnline() {
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-            dataChannel = null;
-            isConnected = false;
-            isOnlineHost = false;
-            isMyTurn = false;
-            showOverlay(onlineMenu);
-        }
-
         function playAgain() {
-            if (gameMode === 'online' && !isOnlineHost) return;
             resetGame();
             gameState = GameState.PLAYING;
             hideAllOverlays();
@@ -775,9 +429,7 @@
 
         function showMainMenu() {
             gameState = GameState.MENU;
-            if (peerConnection) {
-                cancelOnline();
-            }
+            if (peer) cancelOnline();
             hideAllOverlays();
             mainMenu.classList.remove('hidden');
             scoreDisplay.style.display = 'none';
@@ -790,36 +442,24 @@
             e.preventDefault();
             initAudio();
             if (gameState !== GameState.PLAYING) return;
-
             const container = canvas.parentElement;
             const w = container.clientWidth;
-
             for (let touch of e.changedTouches) {
                 const x = touch.clientX - container.getBoundingClientRect().left;
-                if (x < w / 2) {
-                    touchLeft.active = true;
-                    touchLeft.y = touch.clientY;
-                } else {
-                    touchRight.active = true;
-                    touchRight.y = touch.clientY;
-                }
+                if (x < w / 2) { touchLeft.active = true; touchLeft.y = touch.clientY; }
+                else { touchRight.active = true; touchRight.y = touch.clientY; }
             }
         }
 
         function handleTouchMove(e) {
             e.preventDefault();
             if (gameState !== GameState.PLAYING) return;
-
             const container = canvas.parentElement;
             const w = container.clientWidth;
-
             for (let touch of e.changedTouches) {
                 const x = touch.clientX - container.getBoundingClientRect().left;
-                if (x < w / 2 && touchLeft.active) {
-                    touchLeft.y = touch.clientY;
-                } else if (x >= w / 2 && touchRight.active) {
-                    touchRight.y = touch.clientY;
-                }
+                if (x < w / 2 && touchLeft.active) touchLeft.y = touch.clientY;
+                else if (x >= w / 2 && touchRight.active) touchRight.y = touch.clientY;
             }
         }
 
@@ -827,7 +467,6 @@
             e.preventDefault();
             const container = canvas.parentElement;
             const w = container.clientWidth;
-
             for (let touch of e.changedTouches) {
                 const x = touch.clientX - container.getBoundingClientRect().left;
                 if (x < w / 2) touchLeft.active = false;
@@ -839,22 +478,15 @@
             const container = canvas.parentElement;
             const h = container.clientHeight;
 
-            // COM / AI
             if (gameMode === 'com') {
                 const aiTarget = ballY - paddleHeight / 2;
                 const aiError = (Math.random() - 0.5) * paddleHeight * difficulty.errorMargin;
                 paddle2TargetY = aiTarget + aiError;
             }
 
-            // Local input
-            if (touchLeft.active) {
-                paddle1TargetY = touchLeft.y - paddleHeight / 2;
-            }
-            if (touchRight.active) {
-                paddle2TargetY = touchRight.y - paddleHeight / 2;
-            }
+            if (touchLeft.active) paddle1TargetY = touchLeft.y - paddleHeight / 2;
+            if (touchRight.active) paddle2TargetY = touchRight.y - paddleHeight / 2;
 
-            // Smooth movement
             const paddleSpeed = ballSpeed * difficulty.reactionSpeed;
             paddle1Y += (paddle1TargetY - paddle1Y) * Math.min(1, paddleSpeed * dt / 1000);
             paddle2Y += (paddle2TargetY - paddle2Y) * Math.min(1, paddleSpeed * dt / 1000);
@@ -862,12 +494,8 @@
             paddle1Y = Math.max(0, Math.min(h - paddleHeight, paddle1Y));
             paddle2Y = Math.max(0, Math.min(h - paddleHeight, paddle2Y));
 
-            // Online sync
-            if (gameMode === 'online' && isMyTurn) {
-                sendOnlineMessage({
-                    type: 'input',
-                    y: isOnlineHost ? paddle1Y : paddle2Y
-                });
+            if (gameMode === 'online' && isHost) {
+                sendOnline({ type: 'input', y: paddle1Y });
             }
         }
 
@@ -881,69 +509,37 @@
             ballX += ballVX * dt / 16;
             ballY += ballVY * dt / 16;
 
-            // Walls
-            if (ballY - ballRadius <= 0) {
-                ballY = ballRadius;
-                ballVY = Math.abs(ballVY);
-                playWallBounce();
-            } else if (ballY + ballRadius >= h) {
-                ballY = h - ballRadius;
-                ballVY = -Math.abs(ballVY);
-                playWallBounce();
-            }
+            if (ballY - ballRadius <= 0) { ballY = ballRadius; ballVY = Math.abs(ballVY); playWallBounce(); }
+            else if (ballY + ballRadius >= h) { ballY = h - ballRadius; ballVY = -Math.abs(ballVY); playWallBounce(); }
 
-            // Paddle 1 (left)
             const paddle1X = paddleWidth;
-            if (ballX - ballRadius <= paddle1X + paddleWidth &&
-                ballX + ballRadius >= paddle1X &&
-                ballY >= paddle1Y && ballY <= paddle1Y + paddleHeight) {
-
+            if (ballX - ballRadius <= paddle1X + paddleWidth && ballX + ballRadius >= paddle1X && ballY >= paddle1Y && ballY <= paddle1Y + paddleHeight) {
                 ballX = paddle1X + paddleWidth + ballRadius;
                 const hitPos = (ballY - paddle1Y) / paddleHeight;
                 const angle = (hitPos - 0.5) * MAX_BOUNCE_ANGLE;
-
                 ballSpeed = Math.min(ballSpeed * SPEED_INCREMENT, initialBallSpeed * MAX_SPEED_MULTIPLIER);
                 ballVX = Math.abs(Math.sin(angle) * ballSpeed);
                 ballVY = Math.cos(angle) * ballSpeed;
                 playPaddleHit();
             }
 
-            // Paddle 2 (right)
             const paddle2X = w - paddleWidth * 2;
-            if (ballX + ballRadius >= paddle2X &&
-                ballX - ballRadius <= paddle2X + paddleWidth &&
-                ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
-
+            if (ballX + ballRadius >= paddle2X && ballX - ballRadius <= paddle2X + paddleWidth && ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
                 ballX = paddle2X - ballRadius;
                 const hitPos = (ballY - paddle2Y) / paddleHeight;
                 const angle = (hitPos - 0.5) * MAX_BOUNCE_ANGLE;
-
                 ballSpeed = Math.min(ballSpeed * SPEED_INCREMENT, initialBallSpeed * MAX_SPEED_MULTIPLIER);
                 ballVX = -Math.abs(Math.sin(angle) * ballSpeed);
                 ballVY = Math.cos(angle) * ballSpeed;
                 playPaddleHit();
             }
 
-            // Scoring
             let scored = false, lastScorer = 0;
-            if (ballX < -ballRadius) {
-                score.p2++;
-                updateScoreDisplay();
-                playScore();
-                scored = true;
-                lastScorer = 2;
-            } else if (ballX > w + ballRadius) {
-                score.p1++;
-                updateScoreDisplay();
-                playScore();
-                scored = true;
-                lastScorer = 1;
-            }
+            if (ballX < -ballRadius) { score.p2++; updateScoreDisplay(); playScore(); scored = true; lastScorer = 2; }
+            else if (ballX > w + ballRadius) { score.p1++; updateScoreDisplay(); playScore(); scored = true; lastScorer = 1; }
 
             if (scored) {
-                if (gameMode === 'online') {
-                    sendOnlineMessage({ type: 'scored', score: { ...score }, lastScorer });
-                }
+                if (gameMode === 'online') sendOnline({ type: 'scored', score: { ...score }, lastScorer });
                 checkWin(lastScorer);
             }
         }
@@ -955,14 +551,8 @@
                 winnerText.innerHTML = `GANADOR:<br><span class="winner-p${winner}">JUGADOR ${winner}</span>`;
                 showOverlay(gameOverMenu);
                 playWin();
-
-                if (gameMode === 'online') {
-                    sendOnlineMessage({ type: 'gameover', winner });
-                }
-            } else {
-                gameState = GameState.SCORED;
-                scoredTimer = SCORED_DELAY;
-            }
+                if (gameMode === 'online') sendOnline({ type: 'gameover', winner });
+            } else { gameState = GameState.SCORED; scoredTimer = SCORED_DELAY; }
         }
 
         function endGame(winner) {
@@ -972,29 +562,22 @@
             playWin();
         }
 
-        function updateScoreDisplay() {
-            scoreP1El.textContent = score.p1;
-            scoreP2El.textContent = score.p2;
-        }
+        function updateScoreDisplay() { scoreP1El.textContent = score.p1; scoreP2El.textContent = score.p2; }
 
         function draw() {
             const container = canvas.parentElement;
             const w = container.clientWidth, h = container.clientHeight;
-
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, w, h);
 
-            // Center line
             ctx.setLineDash([10, 10]);
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(w / 2, 0);
-            ctx.lineTo(w / 2, h);
+            ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h);
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Touch zones
             if (gameState === GameState.PLAYING) {
                 ctx.fillStyle = 'rgba(0, 255, 136, 0.03)';
                 ctx.fillRect(0, 0, w / 2, h);
@@ -1002,7 +585,6 @@
                 ctx.fillRect(w / 2, 0, w / 2, h);
             }
 
-            // Ball trail
             ballTrail.forEach((pos, i) => {
                 const alpha = (1 - i / ballTrail.length) * 0.3;
                 const radius = ballRadius * (1 - i / ballTrail.length * 0.5);
@@ -1012,7 +594,6 @@
                 ctx.fill();
             });
 
-            // Ball
             ctx.beginPath();
             ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
             ctx.fillStyle = '#fff';
@@ -1021,14 +602,12 @@
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Paddle 1
             ctx.fillStyle = '#00ff88';
             ctx.shadowColor = '#00ff88';
             ctx.shadowBlur = 10;
             ctx.fillRect(paddleWidth, paddle1Y, paddleWidth, paddleHeight);
             ctx.shadowBlur = 0;
 
-            // Paddle 2
             ctx.fillStyle = '#ff6b6b';
             ctx.shadowColor = '#ff6b6b';
             ctx.shadowBlur = 10;
@@ -1038,16 +617,12 @@
 
         function gameLoop(timestamp) {
             if (gameState === GameState.MENU || gameState === GameState.GAME_OVER) return;
-
             const dt = Math.min(timestamp - lastTime, 50);
             lastTime = timestamp;
 
             if (gameState === GameState.SCORED) {
                 scoredTimer -= dt;
-                if (scoredTimer <= 0) {
-                    resetBall();
-                    gameState = GameState.PLAYING;
-                }
+                if (scoredTimer <= 0) { resetBall(); gameState = GameState.PLAYING; }
             }
 
             if (gameState === GameState.PLAYING) {
@@ -1059,11 +634,7 @@
             requestAnimationFrame(gameLoop);
         }
 
-        window.addEventListener('load', () => {
-            initDOM();
-            resize();
-            window.addEventListener('resize', resize);
-        });
+        window.addEventListener('load', () => { initDOM(); resize(); window.addEventListener('resize', resize); });
     </script>
 </body>
 </html>

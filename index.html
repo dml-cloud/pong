@@ -58,6 +58,12 @@
         @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
         @media (orientation: landscape) { .landscape-warning { display: flex !important; } canvas, .overlay { display: none; } }
         .landscape-warning { display: none; position: fixed; inset: 0; background: #1a1a2e; color: #fff; font-family: 'Press Start 2P', monospace; font-size: 12px; justify-content: center; align-items: center; text-align: center; padding: 20px; z-index: 100; }
+
+        .splash-title { font-size: clamp(20px, 7vw, 32px); color: #fff; text-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 50px rgba(0,255,136,0.4); animation: glow 1.5s ease-in-out infinite alternate; }
+        .splash-brand { font-size: 8px; color: #555; margin-top: 30px; opacity: 0; animation: fadeIn 1s ease-in 1s forwards; }
+        #splashScreen { display: flex; flex-direction: column; justify-content: center; align-items: center; animation: fadeOutSplash 0.5s ease-out 2s forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeOutSplash { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
     </style>
 </head>
 <body>
@@ -72,7 +78,12 @@
         <button class="menu-btn" id="menuBtn" title="Menú">☰</button>
         <div class="footer" id="footer" style="display: none;">DML Studios</div>
 
-        <div class="overlay" id="mainMenu">
+        <div class="overlay" id="splashScreen">
+            <div class="splash-title">CLASSIC PONG</div>
+            <div class="splash-brand">DML Studios</div>
+        </div>
+
+        <div class="overlay hidden" id="mainMenu">
             <div class="title">PONG</div>
             <div class="subtitle">CLASSIC</div>
             <div class="menu-buttons">
@@ -673,7 +684,18 @@
             requestAnimationFrame(gameLoop);
         }
 
-        window.addEventListener('load', () => { initDOM(); resize(); window.addEventListener('resize', resize); });
+        window.addEventListener('load', () => {
+            initDOM();
+            resize();
+            window.addEventListener('resize', resize);
+
+            // Splash screen
+            const splashScreen = document.getElementById('splashScreen');
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+                showOverlay(mainMenu);
+            }, 2500);
+        });
     </script>
 </body>
 </html>

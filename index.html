@@ -306,27 +306,45 @@
 
             const code = generateShortCode();
             roomCodeEl.textContent = code;
+            connectingStatus.textContent = 'Iniciando...';
 
-            peer = new Peer('pong-' + code, { debug: 0 });
+            try {
+                peer = new Peer('pong-' + code, { debug: 2 });
 
-            peer.on('open', (id) => {
-                connectingStatus.textContent = 'Esperando a tu amigo...';
-            });
+                peer.on('open', (id) => {
+                    connectingStatus.textContent = 'Esperando a tu amigo... (' + code + ')';
+                });
 
-            peer.on('connection', (c) => {
-                conn = c;
-                isHost = true;
-                isConnected = true;
-                setupConnection();
-            });
+                peer.on('connection', (c) => {
+                    if (conn) conn.close();
+                    conn = c;
+                    isHost = true;
+                    isConnected = true;
+                    setupConnection();
+                });
 
-            peer.on('error', (err) => {
-                if (err.type === 'unavailable-id') {
-                    roomCodeEl.textContent = 'Código en uso, vuelve a intentar';
-                } else {
-                    alert('Error: ' + err.type);
-                }
-            });
+                peer.on('error', (err) => {
+                    console.error('PeerJS error:', err);
+                    if (err.type === 'unavailable-id') {
+                        roomCodeEl.textContent = 'Código en uso';
+                        connectingStatus.textContent = 'Generando nuevo código...';
+                        setTimeout(createRoom, 1000);
+                    } else if (err.type === 'peer-unavailable') {
+                        roomCodeEl.textContent = err.type;
+                        connectingStatus.textContent = 'Código no válido';
+                    } else {
+                        connectingStatus.textContent = 'Error: ' + err.type;
+                    }
+                });
+
+                peer.on('disconnected', () => {
+                    connectingStatus.textContent = 'Reconectando...';
+                    peer.reconnect();
+                });
+
+            } catch (err) {
+                connectingStatus.textContent = 'Error: ' + err.message;
+            }
         }
 
         function joinRoom() {
@@ -334,42 +352,63 @@
             if (!code) return;
 
             showOverlay(connectingMenu);
-            connectingStatus.textContent = 'Conectando...';
+            connectingStatus.textContent = 'Conectando como invitado...';
             initAudio();
 
-            peer = new Peer({ debug: 0 });
+            try {
+                peer = new Peer({ debug: 2 });
 
-            peer.on('open', () => {
-                conn = peer.connect('pong-' + code, { reliable: true });
-                conn.on('open', () => {
-                    isHost = false;
-                    isConnected = true;
-                    setupConnection();
+                peer.on('open', () => {
+                    connectingStatus.textContent = 'Conectando al host...';
+                    conn = peer.connect('pong-' + code, { reliable: true });
+
+                    conn.on('open', () => {
+                        isHost = false;
+                        isConnected = true;
+                        setupConnection();
+                    });
+
+                    conn.on('error', (err) => {
+                        console.error('Connection error:', err);
+                        connectingStatus.textContent = 'Error de conexión';
+                        setTimeout(() => { peer.destroy(); showOverlay(joinRoomMenu); }, 2000);
+                    });
                 });
-                conn.on('error', (err) => {
-                    alert('No se pudo conectar. Vérifica el código.');
-                    showOverlay(joinRoomMenu);
+
+                peer.on('error', (err) => {
+                    console.error('PeerJS error:', err);
+                    connectingStatus.textContent = 'Error: ' + err.type;
+                    setTimeout(() => { peer.destroy(); showOverlay(joinRoomMenu); }, 2000);
                 });
-            });
 
-            peer.on('error', (err) => {
-                alert('Error: ' + err.type);
-                showOverlay(joinRoomMenu);
-            });
-
-            setTimeout(() => {
-                if (!isConnected) {
-                    peer.destroy();
-                    showOverlay(joinRoomMenu);
-                }
-            }, 10000);
+            } catch (err) {
+                connectingStatus.textContent = 'Error: ' + err.message;
+                setTimeout(() => showOverlay(joinRoomMenu), 2000);
+            }
         }
 
         function setupConnection() {
-            conn.on('data', (data) => { handleOnlineMessage(data); });
+            connectingStatus.textContent = '¡Conectado! Iniciando juego...';
+            console.log('Connection established. Host:', isHost);
+
+            conn.on('data', (data) => {
+                console.log('Received data:', data.type);
+                handleOnlineMessage(data);
+            });
+
+            conn.on('close', () => {
+                console.log('Connection closed');
+                connectingStatus.textContent = 'Conexión perdida';
+                isConnected = false;
+                setTimeout(() => showOverlay(onlineMenu), 2000);
+            });
+
+            conn.on('error', (err) => {
+                console.error('Data channel error:', err);
+            });
 
             if (isHost) {
-                startOnlineGame(true);
+                setTimeout(() => startOnlineGame(true), 500);
             }
         }
 

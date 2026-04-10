@@ -40,7 +40,6 @@
             overflow: hidden;
         }
 
-        /* CRT Effect */
         .game-container::before {
             content: '';
             position: absolute;
@@ -57,7 +56,6 @@
             z-index: 10;
         }
 
-        /* Scanline overlay */
         .game-container::after {
             content: '';
             position: absolute;
@@ -82,7 +80,7 @@
             align-items: center;
             background: rgba(26, 26, 46, 0.95);
             z-index: 20;
-            gap: 30px;
+            gap: 25px;
             padding: 20px;
         }
 
@@ -112,59 +110,75 @@
         .menu-buttons {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             width: 100%;
             max-width: 280px;
         }
 
         .btn {
-            padding: 18px 30px;
+            padding: 15px 25px;
             font-family: 'Press Start 2P', monospace;
-            font-size: clamp(10px, 3vw, 14px);
+            font-size: clamp(9px, 2.5vw, 12px);
             border: none;
             cursor: pointer;
             transition: all 0.15s ease;
-            position: relative;
-            overflow: hidden;
         }
 
-        .btn-1p {
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-com {
             background: #00ff88;
             color: #1a1a2e;
         }
 
-        .btn-1p:active {
+        .btn-com:active {
             background: #00cc6a;
-            transform: scale(0.96);
         }
 
-        .btn-2p {
+        .btn-online {
             background: #ff6b6b;
             color: #1a1a2e;
         }
 
-        .btn-2p:active {
+        .btn-online:active {
             background: #cc5555;
-            transform: scale(0.96);
         }
+
+        .btn-easy { background: #4ade80; color: #1a1a2e; }
+        .btn-normal { background: #fbbf24; color: #1a1a2e; }
+        .btn-hard { background: #f87171; color: #1a1a2e; }
 
         .btn-play {
             background: #fff;
             color: #1a1a2e;
         }
 
-        .btn-play:active {
-            background: #ddd;
-            transform: scale(0.96);
+        .btn-back {
+            background: transparent;
+            border: 2px solid #666;
+            color: #888;
+        }
+
+        .btn-copy {
+            background: #6366f1;
+            color: #fff;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .score-display {
             position: absolute;
-            top: 20px;
+            top: 15px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 40px;
+            gap: 35px;
             z-index: 5;
             font-size: clamp(14px, 4vw, 22px);
         }
@@ -181,40 +195,116 @@
 
         .mode-indicator {
             position: absolute;
-            top: 70px;
+            top: 60px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 8px;
+            font-size: 7px;
             color: #666;
             z-index: 5;
         }
 
+        .menu-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 15;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .menu-btn:active {
+            background: rgba(255,255,255,0.2);
+        }
+
         .winner-text {
-            font-size: clamp(12px, 4vw, 18px);
+            font-size: clamp(10px, 3vw, 14px);
             text-align: center;
             line-height: 2;
         }
 
-        .winner-p1 {
-            color: #00ff88;
-        }
-
-        .winner-p2 {
-            color: #ff6b6b;
-        }
+        .winner-p1 { color: #00ff88; }
+        .winner-p2 { color: #ff6b6b; }
 
         .instruction {
-            font-size: 8px;
-            color: #666;
+            font-size: 7px;
+            color: #555;
             text-align: center;
             line-height: 2;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 6px;
+            color: #333;
+            z-index: 5;
+            white-space: nowrap;
+        }
+
+        .online-code-box {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #444;
+            padding: 15px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .code-display {
+            background: #111;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 8px;
+            word-break: break-all;
+            color: #0f0;
+            margin: 10px 0;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-row .btn {
+            flex: 1;
+            padding: 12px 15px;
+        }
+
+        .status-text {
+            font-size: 8px;
+            color: #888;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .waiting-text {
+            color: #fbbf24;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
         }
 
         @media (orientation: landscape) {
             .landscape-warning {
                 display: flex !important;
             }
-            canvas, .overlay {
+            canvas, .overlay, .footer {
                 display: none;
             }
         }
@@ -249,36 +339,86 @@
         </div>
         <div class="mode-indicator" id="modeIndicator" style="display: none;"></div>
 
-        <div class="overlay" id="menuOverlay">
+        <button class="menu-btn" id="menuBtn" title="Menú">☰</button>
+
+        <div class="footer" id="footer" style="display: none;">DML Studios</div>
+
+        <!-- Main Menu -->
+        <div class="overlay" id="mainMenu">
             <div class="title">PONG</div>
             <div class="subtitle">CLASSIC</div>
             <div class="menu-buttons">
-                <button class="btn btn-1p" id="btn1P">1 JUGADOR</button>
-                <button class="btn btn-2p" id="btn2P">2 JUGADORES</button>
+                <button class="btn btn-com" id="btnCOM">1 JUGADOR vs COM</button>
+                <button class="btn btn-online" id="btnOnline">2 JUGADORES ONLINE</button>
             </div>
             <div class="instruction">
                 TOCA LA PANTALLA PARA MOVER<br>LA PALETA
             </div>
         </div>
 
-        <div class="overlay hidden" id="gameOverOverlay">
+        <!-- Difficulty Menu -->
+        <div class="overlay hidden" id="difficultyMenu">
+            <div class="title">DIFICULTAD</div>
+            <div class="difficulty-buttons">
+                <button class="btn btn-easy" id="btnEasy">FÁCIL</button>
+                <button class="btn btn-normal" id="btnNormal">NORMAL</button>
+                <button class="btn btn-hard" id="btnHard">DIFÍCIL</button>
+            </div>
+            <button class="btn btn-back" id="btnBackFromDiff">← VOLVER</button>
+        </div>
+
+        <!-- Online Menu -->
+        <div class="overlay hidden" id="onlineMenu">
+            <div class="title">ONLINE</div>
+            <div class="menu-buttons">
+                <button class="btn btn-com" id="btnCreateRoom">CREAR PARTIDA</button>
+                <button class="btn btn-online" id="btnJoinRoom">UNIRSE A PARTIDA</button>
+            </div>
+            <button class="btn btn-back" id="btnBackFromOnline">← VOLVER</button>
+        </div>
+
+        <!-- Create Room -->
+        <div class="overlay hidden" id="createRoomMenu">
+            <div class="title">CREANDO...</div>
+            <div class="online-code-box">
+                <div class="status-text">Comparte este código con tu amigo:</div>
+                <div class="code-display" id="roomCode">Generando...</div>
+            </div>
+            <button class="btn btn-back" id="btnCancelCreate">CANCELAR</button>
+        </div>
+
+        <!-- Join Room -->
+        <div class="overlay hidden" id="joinRoomMenu">
+            <div class="title">UNIRSE</div>
+            <div class="online-code-box">
+                <div class="status-text">Pega el código de tu amigo:</div>
+                <textarea class="code-display" id="joinCode" placeholder="Pega el código aquí..." style="width: 100%; color: #0f0; resize: none;"></textarea>
+            </div>
+            <button class="btn btn-copy" id="btnConnectJoin">CONECTAR</button>
+            <button class="btn btn-back" id="btnCancelJoin">← VOLVER</button>
+        </div>
+
+        <!-- Connecting -->
+        <div class="overlay hidden" id="connectingMenu">
+            <div class="title">CONECTANDO</div>
+            <div class="status-text waiting-text" id="connectingStatus">Esperando al otro jugador...</div>
+        </div>
+
+        <!-- Game Over -->
+        <div class="overlay hidden" id="gameOverMenu">
             <div class="title">JUEGO TERMINADO</div>
             <div class="winner-text" id="winnerText"></div>
             <button class="btn btn-play" id="btnPlayAgain">JUGAR OTRA VEZ</button>
-            <button class="btn btn-1p" id="btnMenu">MENU</button>
+            <button class="btn btn-back" id="btnMenuFinal">MENU</button>
         </div>
     </div>
 
     <script>
-        // Audio Context
+        // Audio
         let audioCtx = null;
-
         function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-
         function playSound(freq, duration, type = 'square') {
             if (!audioCtx) return;
             try {
@@ -294,18 +434,10 @@
                 osc.stop(audioCtx.currentTime + duration / 1000);
             } catch(e) {}
         }
-
         function playPaddleHit() { playSound(440, 50); }
         function playWallBounce() { playSound(220, 30); }
-        function playScore() {
-            playSound(330, 100);
-            setTimeout(() => playSound(220, 150), 100);
-        }
-        function playWin() {
-            [0, 100, 200, 300].forEach((delay, i) => {
-                setTimeout(() => playSound(440 * Math.pow(2, i/4), 80), delay);
-            });
-        }
+        function playScore() { playSound(330, 100); setTimeout(() => playSound(220, 150), 100); }
+        function playWin() { [0, 100, 200, 300].forEach((delay, i) => setTimeout(() => playSound(440 * Math.pow(2, i/4), 80), delay)); }
 
         // Game Constants
         const WINNING_SCORE = 11;
@@ -315,68 +447,111 @@
         const INITIAL_BALL_SPEED_RATIO = 0.012;
         const SPEED_INCREMENT = 1.05;
         const MAX_SPEED_MULTIPLIER = 2;
-        const AI_ERROR_MARGIN = 0.12;
-        const MAX_BOUNCE_ANGLE = Math.PI / 3; // 60 degrees
+        const MAX_BOUNCE_ANGLE = Math.PI / 3;
+
+        // Difficulty settings
+        const DIFFICULTY = {
+            EASY: { errorMargin: 0.30, reactionSpeed: 0.6, name: 'FÁCIL' },
+            NORMAL: { errorMargin: 0.12, reactionSpeed: 0.85, name: 'NORMAL' },
+            HARD: { errorMargin: 0.03, reactionSpeed: 1.1, name: 'DIFÍCIL' }
+        };
 
         // Game State
-        const GameState = {
-            MENU: 'menu',
-            PLAYING: 'playing',
-            SCORED: 'scored',
-            GAME_OVER: 'game_over'
-        };
+        const GameState = { MENU: 'menu', PLAYING: 'playing', SCORED: 'scored', GAME_OVER: 'game_over', ONLINE_SETUP: 'online_setup' };
 
         // Game Variables
         let canvas, ctx;
         let gameState = GameState.MENU;
-        let isTwoPlayer = false;
+        let gameMode = 'com'; // 'com' or 'online'
+        let difficulty = DIFFICULTY.NORMAL;
+        let isOnlineHost = false;
         let score = { p1: 0, p2: 0 };
 
         let paddleWidth, paddleHeight, ballRadius;
-        let initialBallSpeed;
-        let ballSpeed;
+        let initialBallSpeed, ballSpeed;
 
-        let paddle1Y, paddle2Y;
-        let paddle1TargetY, paddle2TargetY;
-        let ballX, ballY;
-        let ballVX, ballVY;
+        let paddle1Y, paddle2Y, paddle1TargetY, paddle2TargetY;
+        let ballX, ballY, ballVX, ballVY;
         let ballTrail = [];
 
-        let lastTime = 0;
-        let scoredTimer = 0;
+        let lastTime = 0, scoredTimer = 0;
         const SCORED_DELAY = 1000;
 
         let touchLeft = { active: false, y: 0 };
         let touchRight = { active: false, y: 0 };
 
+        // Online
+        let peerConnection = null;
+        let dataChannel = null;
+        let isConnected = false;
+        let isMyTurn = false;
+
+        const rtcConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
         // DOM Elements
-        let menuOverlay, gameOverOverlay, scoreDisplay, modeIndicator;
+        let mainMenu, difficultyMenu, onlineMenu, createRoomMenu, joinRoomMenu, connectingMenu, gameOverMenu;
+        let scoreDisplay, modeIndicator, menuBtn, footer;
         let scoreP1El, scoreP2El, winnerText;
-        let btn1P, btn2P, btnPlayAgain, btnMenu;
+        let roomCodeEl, joinCodeEl, connectingStatus;
+
+        function hideAllOverlays() {
+            [mainMenu, difficultyMenu, onlineMenu, createRoomMenu, joinRoomMenu, connectingMenu, gameOverMenu].forEach(el => el.classList.add('hidden'));
+        }
+
+        function showOverlay(overlay) {
+            hideAllOverlays();
+            overlay.classList.remove('hidden');
+        }
 
         function initDOM() {
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
 
-            menuOverlay = document.getElementById('menuOverlay');
-            gameOverOverlay = document.getElementById('gameOverOverlay');
+            mainMenu = document.getElementById('mainMenu');
+            difficultyMenu = document.getElementById('difficultyMenu');
+            onlineMenu = document.getElementById('onlineMenu');
+            createRoomMenu = document.getElementById('createRoomMenu');
+            joinRoomMenu = document.getElementById('joinRoomMenu');
+            connectingMenu = document.getElementById('connectingMenu');
+            gameOverMenu = document.getElementById('gameOverMenu');
+
             scoreDisplay = document.getElementById('scoreDisplay');
             modeIndicator = document.getElementById('modeIndicator');
+            menuBtn = document.getElementById('menuBtn');
+            footer = document.getElementById('footer');
+
             scoreP1El = document.getElementById('scoreP1');
             scoreP2El = document.getElementById('scoreP2');
             winnerText = document.getElementById('winnerText');
+            roomCodeEl = document.getElementById('roomCode');
+            joinCodeEl = document.getElementById('joinCode');
+            connectingStatus = document.getElementById('connectingStatus');
 
-            btn1P = document.getElementById('btn1P');
-            btn2P = document.getElementById('btn2P');
-            btnPlayAgain = document.getElementById('btnPlayAgain');
-            btnMenu = document.getElementById('btnMenu');
+            // Menu buttons
+            document.getElementById('btnCOM').addEventListener('click', () => showOverlay(difficultyMenu));
+            document.getElementById('btnOnline').addEventListener('click', () => showOverlay(onlineMenu));
+            document.getElementById('btnBackFromDiff').addEventListener('click', () => showOverlay(mainMenu));
+            document.getElementById('btnBackFromOnline').addEventListener('click', () => showOverlay(mainMenu));
 
-            btn1P.addEventListener('click', () => startGame(false));
-            btn2P.addEventListener('click', () => startGame(true));
-            btnPlayAgain.addEventListener('click', () => startGame(isTwoPlayer));
-            btnMenu.addEventListener('click', showMenu);
+            document.getElementById('btnEasy').addEventListener('click', () => startCOMGame(DIFFICULTY.EASY));
+            document.getElementById('btnNormal').addEventListener('click', () => startCOMGame(DIFFICULTY.NORMAL));
+            document.getElementById('btnHard').addEventListener('click', () => startCOMGame(DIFFICULTY.HARD));
 
-            // Touch Events
+            document.getElementById('btnCreateRoom').addEventListener('click', createRoom);
+            document.getElementById('btnJoinRoom').addEventListener('click', () => showOverlay(joinRoomMenu));
+            document.getElementById('btnConnectJoin').addEventListener('click', joinRoom);
+            document.getElementById('btnCancelCreate').addEventListener('click', cancelOnline);
+            document.getElementById('btnCancelJoin').addEventListener('click', cancelOnline);
+
+            document.getElementById('btnPlayAgain').addEventListener('click', playAgain);
+            document.getElementById('btnMenuFinal').addEventListener('click', showMainMenu);
+            menuBtn.addEventListener('click', showMainMenu);
+
             canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
             canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
             canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
@@ -386,15 +561,11 @@
         function resize() {
             const container = canvas.parentElement;
             const dpr = window.devicePixelRatio || 1;
-
             canvas.width = container.clientWidth * dpr;
             canvas.height = container.clientHeight * dpr;
-
             ctx.scale(dpr, dpr);
 
-            const w = container.clientWidth;
-            const h = container.clientHeight;
-
+            const w = container.clientWidth, h = container.clientHeight;
             paddleWidth = w * PADDLE_WIDTH_RATIO;
             paddleHeight = h * PADDLE_HEIGHT_RATIO;
             ballRadius = Math.max(w, h) * BALL_RADIUS_RATIO;
@@ -403,9 +574,7 @@
 
         function resetBall() {
             const container = canvas.parentElement;
-            const w = container.clientWidth;
-            const h = container.clientHeight;
-
+            const w = container.clientWidth, h = container.clientHeight;
             ballX = w / 2;
             ballY = h / 2;
             ballSpeed = initialBallSpeed;
@@ -414,56 +583,208 @@
             const direction = Math.random() < 0.5 ? 1 : -1;
             ballVX = Math.sin(angle) * ballSpeed * direction;
             ballVY = Math.cos(angle) * ballSpeed;
-
             ballTrail = [];
         }
 
         function resetGame() {
             const container = canvas.parentElement;
             const h = container.clientHeight;
-
             score = { p1: 0, p2: 0 };
             updateScoreDisplay();
-
-            paddle1Y = h / 2 - paddleHeight / 2;
-            paddle2Y = h / 2 - paddleHeight / 2;
-            paddle1TargetY = paddle1Y;
-            paddle2TargetY = paddle2Y;
-
+            paddle1Y = paddle2Y = h / 2 - paddleHeight / 2;
+            paddle1TargetY = paddle2TargetY = paddle1Y;
             resetBall();
         }
 
-        function startGame(twoPlayer) {
+        function startCOMGame(diff) {
             initAudio();
-            isTwoPlayer = twoPlayer;
-
+            difficulty = diff;
+            gameMode = 'com';
             resize();
             resetGame();
 
             gameState = GameState.PLAYING;
-
-            menuOverlay.classList.add('hidden');
-            gameOverOverlay.classList.add('hidden');
+            hideAllOverlays();
             scoreDisplay.style.display = 'flex';
             modeIndicator.style.display = 'block';
-            modeIndicator.textContent = isTwoPlayer ? '2 JUGADORES' : '1 JUGADOR';
+            modeIndicator.textContent = `1 JUGADOR vs ${diff.name}`;
+            menuBtn.style.display = 'flex';
+            footer.style.display = 'block';
 
             lastTime = performance.now();
             requestAnimationFrame(gameLoop);
         }
 
-        function showMenu() {
+        async function createRoom() {
+            showOverlay(createRoomMenu);
+            initAudio();
+
+            peerConnection = new RTCPeerConnection(rtcConfig);
+
+            dataChannel = peerConnection.createDataChannel('gameData', { ordered: false });
+            setupDataChannel(dataChannel);
+
+            peerConnection.onicecandidate = (e) => {
+                if (e.candidate === null) {
+                    const offer = JSON.stringify(peerConnection.localDescription);
+                    roomCodeEl.textContent = btoa(offer);
+                }
+            };
+
+            peerConnection.oniceconnectionstatechange = () => {
+                if (peerConnection.iceConnectionState === 'connected') {
+                    isConnected = true;
+                    isOnlineHost = true;
+                    isMyTurn = true;
+                    startOnlineGame(true);
+                }
+            };
+
+            await peerConnection.setLocalDescription();
+        }
+
+        async function joinRoom() {
+            const code = joinCodeEl.value.trim();
+            if (!code) return;
+
+            try {
+                const offer = atob(code);
+                showOverlay(connectingMenu);
+                connectingStatus.textContent = 'Conectando...';
+
+                peerConnection = new RTCPeerConnection(rtcConfig);
+
+                peerConnection.ondatachannel = (e) => {
+                    dataChannel = e.channel;
+                    setupDataChannel(dataChannel);
+                };
+
+                peerConnection.oniceconnectionstatechange = () => {
+                    if (peerConnection.iceConnectionState === 'connected') {
+                        isConnected = true;
+                        isOnlineHost = false;
+                        isMyTurn = false;
+                    }
+                };
+
+                peerConnection.onicecandidate = (e) => {
+                    if (e.candidate === null) {
+                        const answer = JSON.stringify(peerConnection.localDescription);
+                        navigator.clipboard.writeText(btoa(answer)).then(() => {
+                            connectingStatus.textContent = 'Código copiado. Compártelo con el host.';
+                        });
+                    }
+                };
+
+                const parsedOffer = JSON.parse(offer);
+                await peerConnection.setRemoteDescription(parsedOffer);
+                await peerConnection.setLocalDescription();
+            } catch (err) {
+                alert('Código inválido. Inténtalo de nuevo.');
+                showOverlay(joinRoomMenu);
+            }
+        }
+
+        function setupDataChannel(channel) {
+            channel.onopen = () => {
+                console.log('Data channel open');
+            };
+
+            channel.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                handleOnlineMessage(data);
+            };
+        }
+
+        function handleOnlineMessage(data) {
+            if (data.type === 'start') {
+                isConnected = true;
+                isOnlineHost = data.isHost;
+                isMyTurn = data.isHost;
+                startOnlineGame(data.isHost);
+            } else if (data.type === 'input') {
+                if (!isMyTurn) {
+                    paddle2TargetY = data.y;
+                }
+            } else if (data.type === 'sync') {
+                score = data.score;
+                ballX = data.ballX;
+                ballY = data.ballY;
+                ballVX = data.ballVX;
+                ballVY = data.ballVY;
+                ballSpeed = data.ballSpeed;
+                updateScoreDisplay();
+            } else if (data.type === 'scored') {
+                score = data.score;
+                updateScoreDisplay();
+                checkWin(data.lastScorer);
+            } else if (data.type === 'gameover') {
+                endGame(data.winner);
+            }
+        }
+
+        function sendOnlineMessage(data) {
+            if (dataChannel && dataChannel.readyState === 'open') {
+                dataChannel.send(JSON.stringify(data));
+            }
+        }
+
+        function startOnlineGame(isHost) {
+            gameMode = 'online';
+            resize();
+            resetGame();
+
+            gameState = GameState.PLAYING;
+            hideAllOverlays();
+            scoreDisplay.style.display = 'flex';
+            modeIndicator.style.display = 'block';
+            modeIndicator.textContent = 'ONLINE';
+            menuBtn.style.display = 'flex';
+            footer.style.display = 'block';
+
+            sendOnlineMessage({ type: 'start', isHost });
+
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function cancelOnline() {
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            dataChannel = null;
+            isConnected = false;
+            isOnlineHost = false;
+            isMyTurn = false;
+            showOverlay(onlineMenu);
+        }
+
+        function playAgain() {
+            if (gameMode === 'online' && !isOnlineHost) return;
+            resetGame();
+            gameState = GameState.PLAYING;
+            hideAllOverlays();
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function showMainMenu() {
             gameState = GameState.MENU;
-            menuOverlay.classList.remove('hidden');
-            gameOverOverlay.classList.add('hidden');
+            if (peerConnection) {
+                cancelOnline();
+            }
+            hideAllOverlays();
+            mainMenu.classList.remove('hidden');
             scoreDisplay.style.display = 'none';
             modeIndicator.style.display = 'none';
+            menuBtn.style.display = 'none';
+            footer.style.display = 'none';
         }
 
         function handleTouchStart(e) {
             e.preventDefault();
             initAudio();
-
             if (gameState !== GameState.PLAYING) return;
 
             const container = canvas.parentElement;
@@ -500,17 +821,13 @@
 
         function handleTouchEnd(e) {
             e.preventDefault();
-
             const container = canvas.parentElement;
             const w = container.clientWidth;
 
             for (let touch of e.changedTouches) {
                 const x = touch.clientX - container.getBoundingClientRect().left;
-                if (x < w / 2) {
-                    touchLeft.active = false;
-                } else {
-                    touchRight.active = false;
-                }
+                if (x < w / 2) touchLeft.active = false;
+                else touchRight.active = false;
             }
         }
 
@@ -518,47 +835,49 @@
             const container = canvas.parentElement;
             const h = container.clientHeight;
 
-            // Player 1 (left) - always touch controlled or AI
-            if (!isTwoPlayer) {
-                // AI for paddle 2 (right)
+            // COM / AI
+            if (gameMode === 'com') {
                 const aiTarget = ballY - paddleHeight / 2;
-                const aiError = (Math.random() - 0.5) * paddleHeight * AI_ERROR_MARGIN;
+                const aiError = (Math.random() - 0.5) * paddleHeight * difficulty.errorMargin;
                 paddle2TargetY = aiTarget + aiError;
             }
 
+            // Local input
             if (touchLeft.active) {
                 paddle1TargetY = touchLeft.y - paddleHeight / 2;
             }
-
             if (touchRight.active) {
                 paddle2TargetY = touchRight.y - paddleHeight / 2;
             }
 
-            // Smooth paddle movement
-            const paddleSpeed = ballSpeed * 1.2;
-
+            // Smooth movement
+            const paddleSpeed = ballSpeed * difficulty.reactionSpeed;
             paddle1Y += (paddle1TargetY - paddle1Y) * Math.min(1, paddleSpeed * dt / 1000);
             paddle2Y += (paddle2TargetY - paddle2Y) * Math.min(1, paddleSpeed * dt / 1000);
 
-            // Clamp paddles
             paddle1Y = Math.max(0, Math.min(h - paddleHeight, paddle1Y));
             paddle2Y = Math.max(0, Math.min(h - paddleHeight, paddle2Y));
+
+            // Online sync
+            if (gameMode === 'online' && isMyTurn) {
+                sendOnlineMessage({
+                    type: 'input',
+                    y: isOnlineHost ? paddle1Y : paddle2Y
+                });
+            }
         }
 
         function updateBall(dt) {
             const container = canvas.parentElement;
-            const w = container.clientWidth;
-            const h = container.clientHeight;
+            const w = container.clientWidth, h = container.clientHeight;
 
-            // Store trail
             ballTrail.unshift({ x: ballX, y: ballY });
             if (ballTrail.length > 5) ballTrail.pop();
 
-            // Move ball
             ballX += ballVX * dt / 16;
             ballY += ballVY * dt / 16;
 
-            // Wall collision (top/bottom)
+            // Walls
             if (ballY - ballRadius <= 0) {
                 ballY = ballRadius;
                 ballVY = Math.abs(ballVY);
@@ -569,55 +888,59 @@
                 playWallBounce();
             }
 
-            // Paddle 1 collision (left)
+            // Paddle 1 (left)
             const paddle1X = paddleWidth;
             if (ballX - ballRadius <= paddle1X + paddleWidth &&
                 ballX + ballRadius >= paddle1X &&
                 ballY >= paddle1Y && ballY <= paddle1Y + paddleHeight) {
 
                 ballX = paddle1X + paddleWidth + ballRadius;
-
                 const hitPos = (ballY - paddle1Y) / paddleHeight;
                 const angle = (hitPos - 0.5) * MAX_BOUNCE_ANGLE;
 
                 ballSpeed = Math.min(ballSpeed * SPEED_INCREMENT, initialBallSpeed * MAX_SPEED_MULTIPLIER);
-                ballVX = Math.sin(angle) * ballSpeed;
+                ballVX = Math.abs(Math.sin(angle) * ballSpeed);
                 ballVY = Math.cos(angle) * ballSpeed;
-
-                if (ballVX < 0) ballVX = Math.abs(ballVX);
                 playPaddleHit();
             }
 
-            // Paddle 2 collision (right)
+            // Paddle 2 (right)
             const paddle2X = w - paddleWidth * 2;
             if (ballX + ballRadius >= paddle2X &&
                 ballX - ballRadius <= paddle2X + paddleWidth &&
                 ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
 
                 ballX = paddle2X - ballRadius;
-
                 const hitPos = (ballY - paddle2Y) / paddleHeight;
                 const angle = (hitPos - 0.5) * MAX_BOUNCE_ANGLE;
 
                 ballSpeed = Math.min(ballSpeed * SPEED_INCREMENT, initialBallSpeed * MAX_SPEED_MULTIPLIER);
-                ballVX = -Math.sin(angle) * ballSpeed;
+                ballVX = -Math.abs(Math.sin(angle) * ballSpeed);
                 ballVY = Math.cos(angle) * ballSpeed;
-
-                if (ballVX > 0) ballVX = -Math.abs(ballVX);
                 playPaddleHit();
             }
 
             // Scoring
+            let scored = false, lastScorer = 0;
             if (ballX < -ballRadius) {
                 score.p2++;
                 updateScoreDisplay();
                 playScore();
-                checkWin(2);
+                scored = true;
+                lastScorer = 2;
             } else if (ballX > w + ballRadius) {
                 score.p1++;
                 updateScoreDisplay();
                 playScore();
-                checkWin(1);
+                scored = true;
+                lastScorer = 1;
+            }
+
+            if (scored) {
+                if (gameMode === 'online') {
+                    sendOnlineMessage({ type: 'scored', score: { ...score }, lastScorer });
+                }
+                checkWin(lastScorer);
             }
         }
 
@@ -626,12 +949,23 @@
                 gameState = GameState.GAME_OVER;
                 const winner = score.p1 >= WINNING_SCORE ? 1 : 2;
                 winnerText.innerHTML = `GANADOR:<br><span class="winner-p${winner}">JUGADOR ${winner}</span>`;
-                gameOverOverlay.classList.remove('hidden');
+                showOverlay(gameOverMenu);
                 playWin();
+
+                if (gameMode === 'online') {
+                    sendOnlineMessage({ type: 'gameover', winner });
+                }
             } else {
                 gameState = GameState.SCORED;
                 scoredTimer = SCORED_DELAY;
             }
+        }
+
+        function endGame(winner) {
+            gameState = GameState.GAME_OVER;
+            winnerText.innerHTML = `GANADOR:<br><span class="winner-p${winner}">JUGADOR ${winner}</span>`;
+            showOverlay(gameOverMenu);
+            playWin();
         }
 
         function updateScoreDisplay() {
@@ -641,10 +975,8 @@
 
         function draw() {
             const container = canvas.parentElement;
-            const w = container.clientWidth;
-            const h = container.clientHeight;
+            const w = container.clientWidth, h = container.clientHeight;
 
-            // Clear
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, w, h);
 
@@ -658,7 +990,7 @@
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Touch zones (subtle indicators)
+            // Touch zones
             if (gameState === GameState.PLAYING) {
                 ctx.fillStyle = 'rgba(0, 255, 136, 0.03)';
                 ctx.fillRect(0, 0, w / 2, h);
@@ -701,9 +1033,7 @@
         }
 
         function gameLoop(timestamp) {
-            if (gameState === GameState.MENU || gameState === GameState.GAME_OVER) {
-                return;
-            }
+            if (gameState === GameState.MENU || gameState === GameState.GAME_OVER) return;
 
             const dt = Math.min(timestamp - lastTime, 50);
             lastTime = timestamp;
@@ -722,11 +1052,9 @@
             }
 
             draw();
-
             requestAnimationFrame(gameLoop);
         }
 
-        // Initialize
         window.addEventListener('load', () => {
             initDOM();
             resize();

@@ -202,6 +202,12 @@
         let conn = null;
         let isHost = false;
         let isConnected = false;
+        let connectionReady = false;
+        let pendingMessages = [];
+        let heartbeatInterval = null;
+        let lastHeartbeat = 0;
+        let lastSyncTime = 0;
+        const SYNC_INTERVAL = 100; // Send sync every 100ms
 
         // DOM Elements
         let mainMenu, difficultyMenu, onlineMenu, createRoomMenu, joinRoomMenu, connectingMenu, gameOverMenu;
@@ -319,19 +325,63 @@
             roomCodeEl.textContent = code;
             connectingStatus.textContent = 'Iniciando...';
 
+            // Cleanup previous peer if exists
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+
             try {
-                peer = new Peer('pong-' + code, { debug: 2 });
+                // Use default PeerJS server with custom ID
+                peer = new Peer('pong-' + code, {
+                    debug: 2,
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' }
+                        ]
+                    }
+                });
 
                 peer.on('open', (id) => {
+                    console.log('Peer open with ID:', id);
                     connectingStatus.textContent = 'Esperando a tu amigo... (' + code + ')';
                 });
 
                 peer.on('connection', (c) => {
-                    if (conn) conn.close();
+                    console.log('Incoming connection from:', c.peer);
+                    if (conn) {
+                        console.log('Closing existing connection');
+                        conn.close();
+                    }
                     conn = c;
                     isHost = true;
                     isConnected = true;
-                    setupConnection();
+                    connectionReady = false;
+
+                    conn.on('open', () => {
+                        console.log('Host connection open');
+                        connectingStatus.textContent = '¡Conectado! Sincronizando...';
+                        // Send ready confirmation to guest
+                        sendOnline({ type: 'host_ready' });
+                        // Flush any pending messages
+                        flushPendingMessages();
+                    });
+
+                    conn.on('data', (data) => {
+                        console.log('Host received data:', data.type);
+                        handleOnlineMessage(data);
+                    });
+
+                    conn.on('close', () => {
+                        console.log('Connection closed');
+                        handleDisconnect();
+                    });
+
+                    conn.on('error', (err) => {
+                        console.error('Data channel error:', err);
+                        connectingStatus.textContent = 'Error de conexión';
+                    });
                 });
 
                 peer.on('error', (err) => {
@@ -339,21 +389,31 @@
                     if (err.type === 'unavailable-id') {
                         roomCodeEl.textContent = 'Código en uso';
                         connectingStatus.textContent = 'Generando nuevo código...';
-                        setTimeout(createRoom, 1000);
+                        setTimeout(createRoom, 1500);
                     } else if (err.type === 'peer-unavailable') {
                         roomCodeEl.textContent = err.type;
                         connectingStatus.textContent = 'Código no válido';
+                    } else if (err.type === 'network' || err.type === 'server-error') {
+                        connectingStatus.textContent = 'Error de red, reintentando...';
+                        setTimeout(() => {
+                            if (peer) peer.destroy();
+                            createRoom();
+                        }, 2000);
                     } else {
                         connectingStatus.textContent = 'Error: ' + err.type;
                     }
                 });
 
                 peer.on('disconnected', () => {
+                    console.log('Peer disconnected, attempting reconnect...');
                     connectingStatus.textContent = 'Reconectando...';
-                    peer.reconnect();
+                    if (peer && !peer.destroyed) {
+                        peer.reconnect();
+                    }
                 });
 
             } catch (err) {
+                console.error('Peer creation error:', err);
                 connectingStatus.textContent = 'Error: ' + err.message;
             }
         }
@@ -363,76 +423,183 @@
             if (!code) return;
 
             showOverlay(connectingMenu);
-            connectingStatus.textContent = 'Conectando como invitado...';
+            connectingStatus.textContent = 'Conectando...';
             initAudio();
 
+            // Cleanup previous peer if exists
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+
             try {
-                peer = new Peer({ debug: 2 });
+                peer = new Peer({
+                    debug: 2,
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' }
+                        ]
+                    }
+                });
 
                 peer.on('open', () => {
+                    console.log('Peer open, attempting connection to:', 'pong-' + code);
                     connectingStatus.textContent = 'Conectando al host...';
-                    conn = peer.connect('pong-' + code, { reliable: true });
+                    conn = peer.connect('pong-' + code, {
+                        reliable: true,
+                        serialization: 'json'
+                    });
+                    // Setup handlers BEFORE connection opens to avoid race conditions
+                    isHost = false;
+                    isConnected = true;
+                    connectionReady = false;
 
                     conn.on('open', () => {
-                        isHost = false;
-                        isConnected = true;
-                        setupConnection();
+                        console.log('Guest connection open');
+                        connectingStatus.textContent = '¡Conectado! Sincronizando...';
+                        // Send ready confirmation to host
+                        sendOnline({ type: 'guest_ready' });
+                        // Flush any pending messages
+                        flushPendingMessages();
+                        // If we already received host_ready, start the game now
+                        if (connectionReady) {
+                            startOnlineGame(false);
+                        }
+                    });
+
+                    conn.on('data', (data) => {
+                        console.log('Guest received data:', data.type);
+                        handleOnlineMessage(data);
+                    });
+
+                    conn.on('close', () => {
+                        console.log('Connection closed');
+                        handleDisconnect();
                     });
 
                     conn.on('error', (err) => {
-                        console.error('Connection error:', err);
+                        console.error('Data channel error:', err);
                         connectingStatus.textContent = 'Error de conexión';
-                        setTimeout(() => { peer.destroy(); showOverlay(joinRoomMenu); }, 2000);
                     });
                 });
 
+
                 peer.on('error', (err) => {
                     console.error('PeerJS error:', err);
-                    connectingStatus.textContent = 'Error: ' + err.type;
-                    setTimeout(() => { peer.destroy(); showOverlay(joinRoomMenu); }, 2000);
+                    if (err.type === 'peer-unavailable') {
+                        connectingStatus.textContent = 'Código no válido o host offline';
+                    } else if (err.type === 'network' || err.type === 'server-error') {
+                        connectingStatus.textContent = 'Error de red, reintentando...';
+                        setTimeout(() => {
+                            if (peer) peer.destroy();
+                            joinRoom();
+                        }, 2000);
+                    } else {
+                        connectingStatus.textContent = 'Error: ' + err.type;
+                    }
+                });
+
+                peer.on('disconnected', () => {
+                    console.log('Peer disconnected');
+                    if (peer && !peer.destroyed) {
+                        peer.reconnect();
+                    }
                 });
 
             } catch (err) {
+                console.error('Peer creation error:', err);
                 connectingStatus.textContent = 'Error: ' + err.message;
-                setTimeout(() => showOverlay(joinRoomMenu), 2000);
             }
         }
 
-        function setupConnection() {
-            connectingStatus.textContent = '¡Conectado! Iniciando juego...';
-            console.log('Connection established. Host:', isHost);
+        function handleDisconnect() {
+            isConnected = false;
+            connectionReady = false;
+            stopHeartbeat();
+            if (gameState === GameState.PLAYING) {
+                gameState = GameState.MENU;
+            }
+            connectingStatus.textContent = 'Conexión perdida';
+            setTimeout(() => {
+                cancelOnline();
+                showOverlay(onlineMenu);
+            }, 2000);
+        }
 
-            conn.on('data', (data) => {
-                console.log('Received data:', data.type);
-                handleOnlineMessage(data);
-            });
+        function startHeartbeat() {
+            stopHeartbeat();
+            heartbeatInterval = setInterval(() => {
+                if (conn && conn.open && isConnected) {
+                    sendOnline({ type: 'heartbeat', timestamp: Date.now() });
+                    // Check if we haven't received anything in 10 seconds
+                    if (lastHeartbeat && Date.now() - lastHeartbeat > 10000) {
+                        console.log('Heartbeat timeout');
+                        handleDisconnect();
+                    }
+                }
+            }, 3000);
+        }
 
-            conn.on('close', () => {
-                console.log('Connection closed');
-                connectingStatus.textContent = 'Conexión perdida';
-                isConnected = false;
-                setTimeout(() => showOverlay(onlineMenu), 2000);
-            });
-
-            conn.on('error', (err) => {
-                console.error('Data channel error:', err);
-            });
-
-            if (isHost) {
-                setTimeout(() => startOnlineGame(true), 500);
+        function stopHeartbeat() {
+            if (heartbeatInterval) {
+                clearInterval(heartbeatInterval);
+                heartbeatInterval = null;
+            }
+            if (connectionCheckInterval) {
+                clearInterval(connectionCheckInterval);
+                connectionCheckInterval = null;
             }
         }
 
         function handleOnlineMessage(data) {
-            if (data.type === 'start') {
+            lastHeartbeat = Date.now();
+
+            if (data.type === 'heartbeat') {
+                // Respond to heartbeat
+                return;
+            }
+
+            if (data.type === 'host_ready') {
+                console.log('Host is ready');
+                if (!isHost) {
+                    // Guest marks that host is ready
+                    connectionReady = true;
+                    // Request sync from host
+                    sendOnline({ type: 'request_sync' });
+                    // If connection is already open (we received conn.open before host_ready),
+                    // start game now and wait for first sync
+                    if (conn && conn.open) {
+                        startOnlineGame(false);
+                    }
+                }
+            } else if (data.type === 'guest_ready') {
+                console.log('Guest is ready');
+                if (isHost && isConnected) {
+                    // Host starts game when guest confirms
+                    startOnlineGame(true);
+                }
+            } else if (data.type === 'start') {
                 startOnlineGame(false);
             } else if (data.type === 'input') {
+                if (isHost) {
+                    // Host receives guest's paddle position (right paddle)
+                    paddle2TargetY = data.y;
+                } else {
+                    // Guest receives host's paddle position (left paddle)
+                    paddle1TargetY = data.y;
+                }
+            } else if (data.type === 'paddle_input') {
+                // Guest sends their paddle position
                 paddle2TargetY = data.y;
             } else if (data.type === 'sync') {
                 score = data.score;
                 ballX = data.ballX; ballY = data.ballY;
                 ballVX = data.ballVX; ballVY = data.ballVY;
                 ballSpeed = data.ballSpeed;
+                // Update paddle positions if provided
+                if (data.paddle1Y !== undefined) paddle1TargetY = data.paddle1Y;
+                if (data.paddle2Y !== undefined) paddle2TargetY = data.paddle2Y;
                 updateScoreDisplay();
             } else if (data.type === 'scored') {
                 score = data.score;
@@ -440,16 +607,45 @@
                 checkWin(data.lastScorer);
             } else if (data.type === 'gameover') {
                 endGame(data.winner);
+            } else if (data.type === 'request_sync') {
+                // Another peer requesting full state sync
+                if (isHost) {
+                    sendFullSync();
+                }
             }
         }
 
         function sendOnline(data) {
-            if (conn && conn.open) conn.send(data);
+            if (conn && conn.open) {
+                conn.send(data);
+            } else {
+                // Queue message if connection not ready
+                pendingMessages.push(data);
+            }
+        }
+
+        function flushPendingMessages() {
+            while (pendingMessages.length > 0 && conn && conn.open) {
+                const msg = pendingMessages.shift();
+                conn.send(msg);
+            }
         }
 
         function cancelOnline() {
-            if (peer) { peer.destroy(); peer = null; }
-            conn = null; isConnected = false; isHost = false;
+            stopHeartbeat();
+            if (conn) {
+                conn.close();
+                conn = null;
+            }
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            conn = null;
+            isConnected = false;
+            isHost = false;
+            connectionReady = false;
+            pendingMessages = [];
             showOverlay(onlineMenu);
         }
 
@@ -464,9 +660,35 @@
             menuBtn.style.display = 'flex';
             footer.style.display = 'block';
 
-            if (isHost) sendOnline({ type: 'start' });
+            // Start heartbeat
+            startHeartbeat();
+            lastHeartbeat = Date.now();
+
+            if (isHost) {
+                // Host sends initial sync to guest
+                sendFullSync();
+            }
+
             lastTime = performance.now();
             requestAnimationFrame(gameLoop);
+        }
+
+        function sendFullSync() {
+            const container = canvas.parentElement;
+            const w = container.clientWidth, h = container.clientHeight;
+            sendOnline({
+                type: 'sync',
+                score: { ...score },
+                ballX: ballX,
+                ballY: ballY,
+                ballVX: ballVX,
+                ballVY: ballVY,
+                ballSpeed: ballSpeed,
+                paddle1Y: paddle1Y,
+                paddle2Y: paddle2Y,
+                canvasWidth: w,
+                canvasHeight: h
+            });
         }
 
         function playAgain() {
@@ -544,8 +766,14 @@
             paddle1Y = Math.max(0, Math.min(h - paddleHeight, paddle1Y));
             paddle2Y = Math.max(0, Math.min(h - paddleHeight, paddle2Y));
 
-            if (gameMode === 'online' && isHost) {
-                sendOnline({ type: 'input', y: paddle1Y });
+            if (gameMode === 'online') {
+                // Host controls left paddle (paddle1), guest controls right paddle (paddle2)
+                if (isHost) {
+                    sendOnline({ type: 'input', y: paddle1Y });
+                } else {
+                    // Guest sends their paddle position
+                    sendOnline({ type: 'input', y: paddle2Y });
+                }
             }
         }
 
@@ -584,13 +812,16 @@
                 playPaddleHit();
             }
 
-            let scored = false, lastScorer = 0;
-            if (ballX < -ballRadius) { score.p2++; updateScoreDisplay(); playScore(); scored = true; lastScorer = 2; }
-            else if (ballX > w + ballRadius) { score.p1++; updateScoreDisplay(); playScore(); scored = true; lastScorer = 1; }
+            // Only host manages scoring logic
+            if (gameMode !== 'online' || isHost) {
+                let scored = false, lastScorer = 0;
+                if (ballX < -ballRadius) { score.p2++; updateScoreDisplay(); playScore(); scored = true; lastScorer = 2; }
+                else if (ballX > w + ballRadius) { score.p1++; updateScoreDisplay(); playScore(); scored = true; lastScorer = 1; }
 
-            if (scored) {
-                if (gameMode === 'online') sendOnline({ type: 'scored', score: { ...score }, lastScorer });
-                checkWin(lastScorer);
+                if (scored) {
+                    if (gameMode === 'online') sendOnline({ type: 'scored', score: { ...score }, lastScorer });
+                    checkWin(lastScorer);
+                }
             }
         }
 
@@ -601,8 +832,13 @@
                 winnerText.innerHTML = `GANADOR:<br><span class="winner-p${winner}">JUGADOR ${winner}</span>`;
                 showOverlay(gameOverMenu);
                 playWin();
-                if (gameMode === 'online') sendOnline({ type: 'gameover', winner });
-            } else { gameState = GameState.SCORED; scoredTimer = SCORED_DELAY; }
+                if (gameMode === 'online' && isHost) {
+                    sendOnline({ type: 'gameover', winner });
+                }
+            } else {
+                gameState = GameState.SCORED;
+                scoredTimer = SCORED_DELAY;
+            }
         }
 
         function endGame(winner) {
@@ -678,6 +914,12 @@
             if (gameState === GameState.PLAYING) {
                 updatePaddles(dt);
                 updateBall(dt);
+
+                // Host sends periodic sync to guest
+                if (gameMode === 'online' && isHost && timestamp - lastSyncTime > SYNC_INTERVAL) {
+                    sendFullSync();
+                    lastSyncTime = timestamp;
+                }
             }
 
             draw();

@@ -210,9 +210,9 @@
         const SYNC_INTERVAL = 100; // Send sync every 100ms
 
         // DOM Elements
-        let mainMenu, difficultyMenu, onlineMenu, createRoomMenu, joinRoomMenu, connectingMenu, gameOverMenu;
-        let scoreDisplay, modeIndicator, menuBtn, footer;
-        let scoreP1El, scoreP2El, winnerText, roomCodeEl, joinCodeEl, connectingStatus;
+        var mainMenu, difficultyMenu, onlineMenu, createRoomMenu, joinRoomMenu, connectingMenu, gameOverMenu;
+        var scoreDisplay, modeIndicator, menuBtn, footer;
+        var scoreP1El, scoreP2El, winnerText, roomCodeEl, joinCodeEl, connectingStatus;
 
         function hideAllOverlays() { [mainMenu, difficultyMenu, onlineMenu, createRoomMenu, joinRoomMenu, connectingMenu, gameOverMenu].forEach(el => el.classList.add('hidden')); }
         function showOverlay(overlay) { hideAllOverlays(); overlay.classList.remove('hidden'); }

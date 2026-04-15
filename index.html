@@ -318,6 +318,7 @@
         }
 
         function createRoom() {
+            console.log('createRoom called');
             showOverlay(createRoomMenu);
             initAudio();
 
@@ -327,6 +328,8 @@
             }
 
             const code = generateShortCode();
+            console.log('Generated code:', code);
+            console.log('roomCodeEl:', roomCodeEl);
             roomCodeEl.textContent = code;
             connectingStatus.textContent = 'Iniciando...';
 
@@ -642,6 +645,7 @@
         }
 
         function cancelOnline() {
+            console.log('cancelOnline called');
             stopHeartbeat();
             if (conn) {
                 conn.close();
@@ -937,7 +941,9 @@
         }
 
         window.addEventListener('load', () => {
+            console.log('Window loaded');
             initDOM();
+            console.log('DOM initialized, roomCodeEl:', roomCodeEl);
             resize();
             window.addEventListener('resize', resize);
 

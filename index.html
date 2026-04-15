@@ -197,16 +197,16 @@
         let touchLeft = { active: false, y: 0 };
         let touchRight = { active: false, y: 0 };
 
-        // Online
-        let peer = null;
-        let conn = null;
-        let isHost = false;
-        let isConnected = false;
-        let connectionReady = false;
-        let pendingMessages = [];
-        let heartbeatInterval = null;
-        let lastHeartbeat = 0;
-        let lastSyncTime = 0;
+        // Online - declare in global scope
+        var peer = null;
+        var conn = null;
+        var isHost = false;
+        var isConnected = false;
+        var connectionReady = false;
+        var pendingMessages = [];
+        var heartbeatInterval = null;
+        var lastHeartbeat = 0;
+        var lastSyncTime = 0;
         const SYNC_INTERVAL = 100; // Send sync every 100ms
 
         // DOM Elements
@@ -321,6 +321,11 @@
             showOverlay(createRoomMenu);
             initAudio();
 
+            if (typeof Peer === 'undefined') {
+                connectingStatus.textContent = 'Error: Librería no cargada. Recarga la página.';
+                return;
+            }
+
             const code = generateShortCode();
             roomCodeEl.textContent = code;
             connectingStatus.textContent = 'Iniciando...';
@@ -421,6 +426,11 @@
         function joinRoom() {
             const code = joinCodeEl.value.trim().toUpperCase();
             if (!code) return;
+
+            if (typeof Peer === 'undefined') {
+                connectingStatus.textContent = 'Error: Librería no cargada. Recarga la página.';
+                return;
+            }
 
             showOverlay(connectingMenu);
             connectingStatus.textContent = 'Conectando...';

@@ -317,10 +317,17 @@
             return code;
         }
 
+        // Track previous menu for back navigation
+        var previousMenu = null;
+
         function createRoom() {
             console.log('createRoom called');
+            previousMenu = onlineMenu;
             showOverlay(createRoomMenu);
             initAudio();
+
+            // Get roomCodeEl directly to ensure we have it
+            var roomCodeElDirect = document.getElementById('roomCode');
 
             if (typeof Peer === 'undefined') {
                 connectingStatus.textContent = 'Error: Librería no cargada. Recarga la página.';
@@ -329,8 +336,12 @@
 
             const code = generateShortCode();
             console.log('Generated code:', code);
-            console.log('roomCodeEl:', roomCodeEl);
-            roomCodeEl.textContent = code;
+            console.log('roomCodeEl:', roomCodeElDirect);
+            if (roomCodeElDirect) {
+                roomCodeElDirect.textContent = code;
+            } else {
+                console.error('roomCodeEl not found!');
+            }
             connectingStatus.textContent = 'Iniciando...';
 
             // Cleanup previous peer if exists
@@ -427,7 +438,9 @@
         }
 
         function joinRoom() {
-            const code = joinCodeEl.value.trim().toUpperCase();
+            // Get joinCodeEl directly to ensure we have it
+            var joinCodeElDirect = document.getElementById('joinCode');
+            const code = joinCodeElDirect ? joinCodeElDirect.value.trim().toUpperCase() : '';
             if (!code) return;
 
             if (typeof Peer === 'undefined') {
@@ -435,6 +448,7 @@
                 return;
             }
 
+            previousMenu = onlineMenu;
             showOverlay(connectingMenu);
             connectingStatus.textContent = 'Conectando...';
             initAudio();
@@ -648,10 +662,12 @@
             console.log('cancelOnline called');
             stopHeartbeat();
             if (conn) {
+                console.log('Closing conn');
                 conn.close();
                 conn = null;
             }
             if (peer) {
+                console.log('Destroying peer');
                 peer.destroy();
                 peer = null;
             }
@@ -660,7 +676,14 @@
             isHost = false;
             connectionReady = false;
             pendingMessages = [];
-            showOverlay(onlineMenu);
+            console.log('Going back to:', previousMenu);
+            // Go back to previous menu, or default to onlineMenu
+            if (previousMenu) {
+                showOverlay(previousMenu);
+                previousMenu = null;
+            } else {
+                showOverlay(onlineMenu);
+            }
         }
 
         function startOnlineGame(isHostPlayer) {

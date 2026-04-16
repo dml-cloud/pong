@@ -328,24 +328,30 @@
 
             // Get roomCodeEl directly to ensure we have it
             var roomCodeElDirect = document.getElementById('roomCode');
+            var connectingStatusDirect = document.getElementById('connectingStatus');
 
-            if (typeof Peer === 'undefined') {
-                connectingStatus.textContent = 'Error: Librería no cargada. Recarga la página.';
-                return;
-            }
-
+            // Generate and display code IMMEDIATELY before any async operations
             const code = generateShortCode();
             console.log('Generated code:', code);
             console.log('roomCodeEl:', roomCodeElDirect);
-            // Update both the direct reference and the global variable
+
+            // Update the display RIGHT NOW
             if (roomCodeElDirect) {
                 roomCodeElDirect.textContent = code;
             }
             if (roomCodeEl) {
                 roomCodeEl.textContent = code;
             }
-            connectingStatus.textContent = 'Esperando a tu amigo... (' + code + ')';
             console.log('Code display updated to:', code);
+
+            if (typeof Peer === 'undefined') {
+                var errorStatus = connectingStatusDirect || connectingStatus;
+                if (errorStatus) errorStatus.textContent = 'Error: Librería no cargada. Recarga la página.';
+                return;
+            }
+
+            var status = connectingStatusDirect || connectingStatus;
+            if (status) status.textContent = 'Esperando a tu amigo... (' + code + ')';
 
             // Cleanup previous peer if exists
             if (peer) {

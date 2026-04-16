@@ -337,12 +337,15 @@
             const code = generateShortCode();
             console.log('Generated code:', code);
             console.log('roomCodeEl:', roomCodeElDirect);
+            // Update both the direct reference and the global variable
             if (roomCodeElDirect) {
                 roomCodeElDirect.textContent = code;
-            } else {
-                console.error('roomCodeEl not found!');
             }
-            connectingStatus.textContent = 'Iniciando...';
+            if (roomCodeEl) {
+                roomCodeEl.textContent = code;
+            }
+            connectingStatus.textContent = 'Esperando a tu amigo... (' + code + ')';
+            console.log('Code display updated to:', code);
 
             // Cleanup previous peer if exists
             if (peer) {

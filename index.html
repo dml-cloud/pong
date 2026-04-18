@@ -248,7 +248,7 @@
             document.getElementById('btnHard').addEventListener('click', () => startCOMGame(DIFFICULTY.HARD));
             document.getElementById('btnCreateRoom').addEventListener('click', createRoom);
             document.getElementById('btnJoinRoom').addEventListener('click', () => { console.log('btnJoinRoom clicked, setting previousMenu = onlineMenu'); previousMenu = onlineMenu; showOverlay(joinRoomMenu); });
-            document.getElementById('btnConnectJoin').addEventListener('click', () => { console.log('btnConnectJoin clicked, code element:', document.getElementById('joinCode'), 'value:', document.getElementById('joinCode').value); joinRoom(); });
+            document.getElementById('btnConnectJoin').addEventListener('click', () => { var joinEl = document.getElementById('joinCode'); console.log('btnConnectJoin clicked, code element:', joinEl, 'value:', joinEl ? joinEl.value : 'null'); joinRoom(); });
             document.getElementById('btnCancelCreate').addEventListener('click', cancelOnline);
             document.getElementById('btnCancelJoin').addEventListener('click', cancelOnline);
             document.getElementById('btnPlayAgain').addEventListener('click', playAgain);

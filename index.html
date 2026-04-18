@@ -248,7 +248,7 @@
             document.getElementById('btnHard').addEventListener('click', () => startCOMGame(DIFFICULTY.HARD));
             document.getElementById('btnCreateRoom').addEventListener('click', createRoom);
             document.getElementById('btnJoinRoom').addEventListener('click', () => { console.log('btnJoinRoom clicked, setting previousMenu = onlineMenu'); previousMenu = onlineMenu; showOverlay(joinRoomMenu); });
-            document.getElementById('btnConnectJoin').addEventListener('click', joinRoom);
+            document.getElementById('btnConnectJoin').addEventListener('click', () => { console.log('btnConnectJoin clicked, code element:', document.getElementById('joinCode'), 'value:', document.getElementById('joinCode').value); joinRoom(); });
             document.getElementById('btnCancelCreate').addEventListener('click', cancelOnline);
             document.getElementById('btnCancelJoin').addEventListener('click', cancelOnline);
             document.getElementById('btnPlayAgain').addEventListener('click', playAgain);
@@ -450,12 +450,18 @@
         function joinRoom() {
             // Get joinCodeEl directly to ensure we have it
             var joinCodeElDirect = document.getElementById('joinCode');
-            const code = joinCodeElDirect ? joinCodeElDirect.value.trim().toUpperCase() : '';
-            if (!code) return;
+            var code = joinCodeElDirect ? joinCodeElDirect.value.trim().toUpperCase() : '';
+            console.log('joinRoom called, code element value:', code);
 
             if (typeof Peer === 'undefined') {
                 connectingStatus.textContent = 'Error: Librería no cargada. Recarga la página.';
                 return;
+            }
+
+            if (!code) {
+                connectingStatus.textContent = 'Introduce un código primero';
+                return;
+            }
             }
 
             previousMenu = onlineMenu;

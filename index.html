@@ -820,8 +820,15 @@
                 paddle2TargetY = aiTarget + aiError;
             }
 
-            if (touchLeft.active) paddle1TargetY = touchLeft.y - paddleHeight / 2;
-            if (touchRight.active) paddle2TargetY = touchRight.y - paddleHeight / 2;
+            // In online mode, each player only controls their own paddle
+            if (gameMode === 'online') {
+                if (isHost && touchLeft.active) paddle1TargetY = touchLeft.y - paddleHeight / 2;
+                if (!isHost && touchRight.active) paddle2TargetY = touchRight.y - paddleHeight / 2;
+            } else {
+                // Local / COM mode - both controls work
+                if (touchLeft.active) paddle1TargetY = touchLeft.y - paddleHeight / 2;
+                if (touchRight.active) paddle2TargetY = touchRight.y - paddleHeight / 2;
+            }
 
             const paddleSpeed = ballSpeed * difficulty.reactionSpeed;
             paddle1Y += (paddle1TargetY - paddle1Y) * Math.min(1, paddleSpeed * dt / 1000);
@@ -853,6 +860,9 @@
 
             if (ballY - ballRadius <= 0) { ballY = ballRadius; ballVY = Math.abs(ballVY); playWallBounce(); }
             else if (ballY + ballRadius >= h) { ballY = h - ballRadius; ballVY = -Math.abs(ballVY); playWallBounce(); }
+
+            // Safety clamp - ensure ball stays within canvas
+            ballY = Math.max(ballRadius, Math.min(h - ballRadius, ballY));
 
             const paddle1X = paddleWidth;
             if (ballX - ballRadius <= paddle1X + paddleWidth && ballX + ballRadius >= paddle1X && ballY >= paddle1Y && ballY <= paddle1Y + paddleHeight) {

@@ -480,8 +480,16 @@
                     }
                 });
 
+                // Connection timeout - if not connected in 15 seconds, show error
+                var connectionTimeout = setTimeout(() => {
+                    console.error('Connection timeout - guest did not connect in 15s');
+                    connectingStatus.textContent = 'Timeout: No se pudo conectar al host';
+                    if (peer && !peer.destroyed) peer.destroy();
+                }, 15000);
+
                 peer.on('open', () => {
-                    console.log('Peer open, attempting connection to:', 'pong-' + code);
+                    console.log('Guest Peer open, ID:', peer.id);
+                    console.log('Attempting connection to:', 'pong-' + code);
                     connectingStatus.textContent = 'Conectando al host...';
                     conn = peer.connect('pong-' + code, {
                         reliable: true,
@@ -494,6 +502,7 @@
 
                     conn.on('open', () => {
                         console.log('Guest connection open');
+                        clearTimeout(connectionTimeout);
                         connectingStatus.textContent = '¡Conectado! Sincronizando...';
                         // Send ready confirmation to host
                         sendOnline({ type: 'guest_ready' });
@@ -512,17 +521,20 @@
 
                     conn.on('close', () => {
                         console.log('Connection closed');
+                        clearTimeout(connectionTimeout);
                         handleDisconnect();
                     });
 
                     conn.on('error', (err) => {
                         console.error('Data channel error:', err);
+                        clearTimeout(connectionTimeout);
                         connectingStatus.textContent = 'Error de conexión';
                     });
                 });
 
 
                 peer.on('error', (err) => {
+                    clearTimeout(connectionTimeout);
                     console.error('PeerJS error:', err);
                     if (err.type === 'peer-unavailable') {
                         connectingStatus.textContent = 'Código no válido o host offline';

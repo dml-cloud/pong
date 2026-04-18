@@ -205,6 +205,7 @@
         var connectionReady = false;
         var pendingMessages = [];
         var heartbeatInterval = null;
+        var connectionCheckInterval = null;
         var lastHeartbeat = 0;
         var lastSyncTime = 0;
         const SYNC_INTERVAL = 100; // Send sync every 100ms

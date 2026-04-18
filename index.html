@@ -490,7 +490,7 @@
                     console.error('Connection timeout - guest did not connect in 15s');
                     connectingStatus.textContent = 'Timeout: No se pudo conectar al host';
                     if (peer && !peer.destroyed) peer.destroy();
-                }, 15000);
+                }, 30000);
 
                 peer.on('open', () => {
                     console.log('Guest Peer open, ID:', peer.id);
